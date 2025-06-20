@@ -13,8 +13,8 @@ class TelaRecuperarSenha extends StatelessWidget {
             Navigator.pop(context);
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Color(0xFF7AC77E)),
-            shape: MaterialStateProperty.all(CircleBorder()),
+            backgroundColor: WidgetStateProperty.all(Color(0xFF7AC77E)),
+            shape: WidgetStateProperty.all(CircleBorder()),
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -99,7 +99,7 @@ class _CampoTexto extends StatelessWidget {
   final String label;
   final String hint;
 
-  const _CampoTexto({super.key, required this.label, required this.hint});
+  const _CampoTexto({required this.label, required this.hint});
 
   @override
   Widget build(BuildContext context) {

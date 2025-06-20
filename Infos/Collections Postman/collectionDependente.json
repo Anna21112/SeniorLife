@@ -1,0 +1,85 @@
+{
+    "info": {
+        "name": "SeniorLife - Dependente",
+        "_postman_id": "c8e1e2b0-9012-4bcd-9abc-dependente",
+        "description": "Collection de rotas de dependente (idoso) do SeniorLife",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Cadastro de Dependente",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token_acompanhante}}",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"nome_completo\": \"Maria Silva\",\n  \"data_nascimento\": \"1940-01-01\",\n  \"condicoes_medicas\": \"Hipertensão\",\n  \"contato_emergencia_nome\": \"João Silva\",\n  \"contato_emergencia_telefone\": \"11999999999\",\n  \"id_acompanhante\": \"{{id_acompanhante}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/dependents/Cadastro",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "dependents",
+                        "Cadastro"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Login de Dependente",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cpf\": \"12345678900\",\n  \"senha\": \"senha123\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/dependents/Login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "dependents",
+                        "Login"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000"
+        },
+        {
+            "key": "token_acompanhante",
+            "value": ""
+        },
+        {
+            "key": "id_acompanhante",
+            "value": ""
+        }
+    ]
+}

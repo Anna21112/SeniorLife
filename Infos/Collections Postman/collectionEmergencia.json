@@ -1,0 +1,172 @@
+{
+    "info": {
+        "name": "SeniorLife - Emergência",
+        "_postman_id": "c8e1e2b0-5678-4bcd-9abc-emergencia",
+        "description": "Collection de rotas de emergência do SeniorLife",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Criar Emergência",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"dependente_id\": \"\",\n  \"descricao\": \"Emergência exemplo\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/emergency",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "emergency"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Buscar Emergência por Dependente",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/emergency/{{dependente_id}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "emergency",
+                        "{{dependente_id}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Atualizar Emergência",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"descricao\": \"Atualização da emergência\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/emergency/{{dependente_id}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "emergency",
+                        "{{dependente_id}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Disparar Alerta de Emergência",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"dependente_id\": \"\",\n  \"mensagem\": \"Alerta de emergência!\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/emergency/emergency_alert",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "emergency",
+                        "emergency_alert"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Cancelar Alerta de Emergência",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"dependente_id\": \"\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/emergency/cancel_alert",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "emergency",
+                        "cancel_alert"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Buscar Informações Médicas",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/emergency/medical_info/{{userId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "emergency",
+                        "medical_info",
+                        "{{userId}}"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000"
+        },
+        {
+            "key": "dependente_id",
+            "value": ""
+        },
+        {
+            "key": "userId",
+            "value": ""
+        }
+    ]
+}

@@ -1,0 +1,199 @@
+{
+    "info": {
+        "name": "SeniorLife - Rotinas",
+        "_postman_id": "c8e1e2b0-1234-4bcd-9abc-rotinas",
+        "description": "Collection de rotas de rotina (CRUD de atividades) do SeniorLife",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Criar Atividade",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Exemplo de atividade\",\n  \"type\": \"atividade fisica\",\n  \"schedule\": \"2025-06-20T10:00:00Z\",\n  \"description\": \"Descrição opcional\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/rotinas/{{id_idoso}}/activity",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "rotinas",
+                        "{{id_idoso}}",
+                        "activity"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Listar Todas Atividades",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/rotinas/{{id_idoso}}/activity",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "rotinas",
+                        "{{id_idoso}}",
+                        "activity"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Deletar Todas Atividades",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/rotinas/{{id_idoso}}/activity",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "rotinas",
+                        "{{id_idoso}}",
+                        "activity"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Buscar Atividade Específica",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/rotinas/{{id_idoso}}/activity/{{activityId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "rotinas",
+                        "{{id_idoso}}",
+                        "activity",
+                        "{{activityId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Atualizar Atividade",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Novo título\",\n  \"type\": \"alimentação\",\n  \"schedule\": \"2025-06-21T10:00:00Z\",\n  \"description\": \"Nova descrição\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/rotinas/{{id_idoso}}/activity/{{activityId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "rotinas",
+                        "{{id_idoso}}",
+                        "activity",
+                        "{{activityId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Deletar Atividade Específica",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/rotinas/{{id_idoso}}/activity/{{activityId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "rotinas",
+                        "{{id_idoso}}",
+                        "activity",
+                        "{{activityId}}"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "id_idoso",
+            "value": ""
+        },
+        {
+            "key": "activityId",
+            "value": ""
+        }
+    ]
+}

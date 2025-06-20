@@ -1,0 +1,72 @@
+{
+    "info": {
+        "name": "SeniorLife - Acompanhante",
+        "_postman_id": "c8e1e2b0-3456-4bcd-9abc-acompanhante",
+        "description": "Collection de rotas de acompanhante (caregiver) do SeniorLife",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Cadastro de Acompanhante",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"nome_completo\": \"João da Silva\",\n  \"email\": \"joao@email.com\",\n  \"senha\": \"senha123\",\n  \"telefone\": \"11999999999\",\n  \"data_nascimento\": \"1980-01-01\",\n  \"cpf\": \"12345678900\",\n  \"endereco_completo\": \"Rua Exemplo, 123, São Paulo, SP\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/caregivers/Cadastro",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "caregivers",
+                        "Cadastro"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Login de Acompanhante",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"joao@email.com\",\n  \"senha\": \"senha123\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/caregivers/Login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "caregivers",
+                        "Login"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000"
+        }
+    ]
+}

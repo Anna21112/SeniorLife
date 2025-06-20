@@ -14,8 +14,8 @@ class TelaCadastro extends StatelessWidget {
             Navigator.pop(context);
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Color(0xFF7AC77E)),
-            shape: MaterialStateProperty.all(CircleBorder()),
+            backgroundColor: WidgetStateProperty.all(Color(0xFF7AC77E)),
+            shape: WidgetStateProperty.all(CircleBorder()),
           ),
         ),
         backgroundColor: Colors.transparent,
