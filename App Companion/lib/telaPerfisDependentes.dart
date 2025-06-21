@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 
-// Importa o arquivo com as barras de navegação customizadas
-import 'widgets/navigation_bars.dart';
-
 // TODO: Crie o arquivo 'edit_profile_screen.dart' em uma pasta 'screens' e descomente a linha abaixo.
 // import 'screens/edit_profile_screen.dart';
-
 
 // --- Modelo de Dados ---
 class Profile {
@@ -64,10 +60,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Roboto',
+        // A thematização da AppBar foi mantida, caso você decida adicioná-la de volta.
         appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF31A1C6),
-            foregroundColor: Colors.white,
-            elevation: 1),
+          backgroundColor: Color(0xFF31A1C6),
+          foregroundColor: Colors.white,
+          elevation: 1,
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -114,12 +112,14 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),
-        content:
-            Text('Tem certeza que deseja excluir o perfil de ${profile.name}?'),
+        content: Text(
+          'Tem certeza que deseja excluir o perfil de ${profile.name}?',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Não')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Não'),
+          ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
@@ -146,13 +146,8 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // O Scaffold agora não tem mais a propriedade 'appBar'.
     return Scaffold(
-      appBar: CustomAppBar(
-        onProfilePressed: () {
-          // Ação para o botão de perfil
-        },
-      ),
-      bottomNavigationBar: const CustomBottomNavBar(),
       body: FutureBuilder<List<Profile>>(
         future: _profilesFuture,
         builder: (context, snapshot) {
@@ -166,17 +161,18 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      color: Colors.red, size: 60),
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
                   const SizedBox(height: 16),
-                  Text('Erro ao carregar perfis: ${snapshot.error}',
-                      textAlign: TextAlign.center),
+                  Text(
+                    'Erro ao carregar perfis: ${snapshot.error}',
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.refresh),
                     label: const Text('Tentar Novamente'),
                     onPressed: _loadProfiles,
-                  )
+                  ),
                 ],
               ),
             );
@@ -199,10 +195,13 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                 leading: CircleAvatar(
                   backgroundColor: Colors.green[100],
                   child: Text(
-                    profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '?',
+                    profile.name.isNotEmpty
+                        ? profile.name[0].toUpperCase()
+                        : '?',
                     style: TextStyle(
-                        color: Colors.green[800],
-                        fontWeight: FontWeight.bold),
+                      color: Colors.green[800],
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 title: Text(profile.name),
@@ -226,7 +225,9 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                         );
                         */
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Navegando para a tela de edição...')),
+                          const SnackBar(
+                            content: Text('Navegando para a tela de edição...'),
+                          ),
                         );
                       },
                       child: const Text('Editar'),
@@ -249,6 +250,3 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
     );
   }
 }
-
-// A TELA DE EDIÇÃO FOI REMOVIDA DAQUI.
-// CRIE-A EM SEU PRÓPRIO ARQUIVO (ex: lib/screens/edit_profile_screen.dart)

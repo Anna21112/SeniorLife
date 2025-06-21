@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  http: ^1.2.1
+
   flutter:
     sdk: flutter
   intl: ^0.20.2
@@ -62,6 +64,7 @@ flutter:
   assets:
     - assets/imagens/backgroundSenior.png
     - assets/imagens/logo.png
+    - assets/imagens/icone_senhor.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

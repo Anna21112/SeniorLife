@@ -1,140 +1,320 @@
 import 'package:flutter/material.dart';
-import 'menu_gerenciamento.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'cadastro.dart';
+import 'esqueciSenha.dart';
+import 'menuDependentes.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: DadosDependenteScreen(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(const MyApp());
 }
 
-class DadosDependenteScreen extends StatelessWidget {
-  const DadosDependenteScreen({super.key});
-   final double iconSize1 = 28.0;
-  final double iconSize2 = 32.0;
-  final double iconSize3 = 26.0;
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-  Widget _buildIconWithMenu({
-  required BuildContext context,
-  required String imagePath,
-  required double size,
-  VoidCallback? onTap, // Adicione este parâmetro opcional
-}) {
-  return GestureDetector(
-    onTap: onTap, // Executa a função passada ao clicar
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Image.asset(
-        imagePath,
-        width: size,
-        height: size,
-      ),
-    ),
-  );
-}
-
-  // Função para construir o ícone de navegação
-  Widget _buildNavigationIcon(
-      {required IconData icon, required double size, required VoidCallback onPressed, Color? iconColor}) {
-    return IconButton(
-      icon: Icon(icon, color: iconColor), // A cor é aplicada aqui
-      iconSize: size,
-      tooltip: "Ir para o calendário",
-      onPressed: onPressed,
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Senior Life',
+      debugShowCheckedModeBanner: false,
+      home: const TelaLogin(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
     );
   }
+}
+
+class TelaLogin extends StatefulWidget {
+  const TelaLogin({super.key});
+
+  @override
+  State<TelaLogin> createState() => _TelaLoginState();
+}
+
+class _TelaLoginState extends State<TelaLogin> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
+
+  bool _carregando = false;
+
+  Future<void> _fazerLogin() async {
+    final email = _emailController.text.trim();
+    final senha = _senhaController.text.trim();
+
+    if (email.isEmpty || senha.isEmpty) {
+      _mostrarErro('Preencha todos os campos.');
+      return;
+    }
+
+    setState(() {
+      _carregando = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://suaapi.com/login'), // Substitua pela sua URL
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'senha': senha}),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const TelaAdicionarDependente()),
+        );
+      } else {
+        _mostrarErro('E-mail ou senha inválidos.');
+      }
+    } catch (e) {
+      _mostrarErro('Erro de conexão: $e');
+    } finally {
+      setState(() {
+        _carregando = false;
+      });
+    }
+  }
+
+  void _mostrarErro(String mensagem) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Erro'),
+        content: Text(mensagem),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60),
-        child: AppBar(
-          backgroundColor: Color(0xFF2CA6C9), // Azul superior
-          leading: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: CircleAvatar(
-              minRadius: 60,
-              maxRadius: 75,
-              backgroundColor: Colors.white,
-              child: Image.asset(
-                'assets/logo.png'
-              ),
-            ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Icon(Icons.person, size: 55, color: Colors.white),
-            ),
-          ],
-          elevation: 0,
-        ),
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          SizedBox(height: 20),
-          ListTile(
-            leading: CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.green,
-              child: Text(
-                'R',
-                style: TextStyle(fontSize: 30, color: Colors.white),
+          Container(
+            constraints: const BoxConstraints.expand(),
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/imagens/backgroundSenior.png'),
+                fit: BoxFit.cover,
               ),
             ),
-            title: Text(
-              'Horacio',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-            ),
           ),
-          Divider(thickness: 1),
-          Expanded(child: Container()), // espaço em branco
+          Center(child: _retanguloLogin()),
         ],
       ),
-  
+    );
+  }
 
-bottomNavigationBar: BottomAppBar(
-        color: Color(0xFF2CA6C9), // Azul inferior
-        child: Row(
-          // Distribui os ícones igualmente ao longo da barra
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildIconWithMenu(
-              context: context,
-              imagePath: 'assets/config.png', 
-              size: iconSize1,
-            ),
-            // ÍCONE 2: Imagem com menu flutuante
-            _buildIconWithMenu(
-              context: context,
-              imagePath: 'assets/old_man_smiling.png', 
-              size: iconSize2,
-  onTap: () {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: MenuGerenciamento(),
+  Widget _retanguloLogin() {
+    return Container(
+      width: 320,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F6FF),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(2, 4)),
+        ],
       ),
-    );
-  },
-),
-// ÍCONE 3: Ícone padrão que navega para outra tela
-_buildNavigationIcon(
-  icon: Icons.calendar_today,
-  size: iconSize3,
-  iconColor: Colors.white,
-  onPressed: () {
-    // Ação de clique para o terceiro ícone
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Navegando para o calendário')),
-    );
-  },
-),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Image.asset('assets/imagens/logo.png', height: 70),
+            const SizedBox(height: 10),
+            RichText(
+              textAlign: TextAlign.center,
+              text: const TextSpan(
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                children: [
+                  TextSpan(text: 'Bem-vindo(a) ao '),
+                  TextSpan(
+                    text: 'Sênior',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  TextSpan(text: ' '),
+                  TextSpan(
+                    text: 'Life',
+                    style: TextStyle(color: Colors.green),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            _campoTexto(
+              label: 'E-mail',
+              hint: 'exemplo@gmail.com',
+              controller: _emailController,
+            ),
+            const SizedBox(height: 20),
+            _campoTexto(
+              label: 'Senha',
+              hint: 'Digite sua senha',
+              isSenha: true,
+              controller: _senhaController,
+            ),
+            const SizedBox(height: 20),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TelaRecuperarSenha(),
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF31A2C6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    minimumSize: const Size(0, 42),
+                  ),
+                  child: const Text(
+                    'Esqueci minha senha',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TelaCadastro()),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF31A2C6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cadastre-se',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: _carregando ? null : _fazerLogin,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7AC77E),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 12,
+                ),
+              ),
+              child: _carregando
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Entrar',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Botão de teste para pular o login
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TelaAdicionarDependente(),
+                  ),
+                );
+              },
+              child: const Text(
+                'Entrar (Teste - pular login)',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
           ],
         ),
-    ),
+      ),
+    );
+  }
+
+  Widget _campoTexto({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    bool isSenha = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: Text(
+            label,
+            style: const TextStyle(color: Colors.black, fontSize: 18),
+          ),
+        ),
+        const SizedBox(height: 5),
+        SizedBox(
+          height: 40,
+          child: TextField(
+            controller: controller,
+            obscureText: isSenha,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFFFFAFA),
+              hintText: hint,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              enabledBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Color(0xFF31A2C6)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: const BorderSide(
+                  color: Color(0xFF31A2C6),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+      ],
     );
   }
 }

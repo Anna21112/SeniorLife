@@ -1,59 +1,48 @@
 import 'package:flutter/material.dart';
-// Certifique-se de que este import aponta para o seu arquivo de menu
-// import 'menu_gerenciamento.dart'; 
+import '../telaPerfilAcompanhante.dart';
+import '../tela_saude.dart';
 
-// --- WIDGET DA BARRA SUPERIOR (APP BAR) ---
+// Adicione os imports das futuras telas de dependentes aqui
+// import '../tela_adicionar_dependente.dart';
+// import '../tela_editar_dependentes.dart';
+// import '../tela_perfil_dependente.dart';
 
+// Modelo para representar um dependente.
+// No futuro, você irá popular uma lista desses objetos com os dados da sua API.
+class Dependente {
+  final int id;
+  final String nome;
+
+  Dependente({required this.id, required this.nome});
+}
+
+// Barra superior reutilizável com logo e botão de usuário
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final VoidCallback onProfilePressed;
-
-  const CustomAppBar({
-    Key? key,
-    this.title = '',
-    required this.onProfilePressed,
-  }) : super(key: key);
+  final VoidCallback? onProfilePressed;
+  const CustomAppBar({super.key, this.onProfilePressed});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color(0xFF2A9DB8),
+      backgroundColor: const Color(0xFF31A2C6),
+      elevation: 0,
       automaticallyImplyLeading: false,
-      elevation: 4.0,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          // SUBSTITUA PELO SEU LOGOTIPO
-          // Exemplo: Image.asset('assets/seu_logo.png', height: 40)
-          Container(
-            padding: const EdgeInsets.all(4.0),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.spa, // Ícone de exemplo
-              color: Colors.green,
-              size: 32,
-            ),
-          ),
-          
-          Text(title, style: const TextStyle(color: Colors.white)),
-          
-          Row(
-            children: [
-              Container(
-                height: 30,
-                width: 2,
-                color: Colors.white.withOpacity(0.7),
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
-              ),
-              IconButton(
-                icon: const Icon(Icons.person, color: Colors.white, size: 35),
-                onPressed: onProfilePressed,
-                tooltip: 'Perfil',
-              ),
-            ],
+        children: [
+          Image.asset('assets/imagens/logo.png', height: 40),
+          IconButton(
+            icon: const Icon(Icons.person, color: Colors.white, size: 30),
+            onPressed:
+                onProfilePressed ??
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TelaPerfilAcompanhante(),
+                    ),
+                  );
+                },
           ),
         ],
       ),
@@ -64,106 +53,243 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-
-// --- WIDGET DA BARRA INFERIOR (BOTTOM NAV BAR) ---
-
+// Rodapé reutilizável com ícones e animação do menu
 class CustomBottomNavBar extends StatelessWidget {
-  const CustomBottomNavBar({super.key});
+  final VoidCallback? onProfilePressed;
+  final VoidCallback? onCalendarPressed;
+
+  const CustomBottomNavBar({
+    super.key,
+    this.onProfilePressed,
+    this.onCalendarPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Definindo as variáveis de tamanho aqui dentro para melhor escopo
-    const double iconSize1 = 28.0;
-    const double iconSize2 = 32.0;
-    const double iconSize3 = 26.0;
+    // =======================================================================
+    // AQUI É ONDE OS DADOS VIRIÃO DA SUA API
+    // =======================================================================
+    // Por enquanto, usamos uma lista estática como exemplo.
+    // No futuro, você usará um FutureBuilder ou outro gerenciador de estado
+    // para buscar esses dados e reconstruir o widget.
+    final List<Dependente> listaDeDependentes = [
+      Dependente(id: 1, nome: 'Rogério Almeida'),
+      Dependente(id: 2, nome: 'Clark Quente'),
+      Dependente(id: 3, nome: 'Chico Moedas'),
+    ];
+    // =======================================================================
 
-    return BottomAppBar(
-      color: const Color(0xFF2CA6C9), // Azul inferior
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // Ícone 1 (Config)
-          _buildIconWithMenu(
-            context: context,
-            imagePath: 'assets/config.png', // Verifique se o asset existe
-            size: iconSize1,
-            onTap: () {
-               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ícone de Configurações clicado!')),
-              );
-            }
-          ),
+    return SafeArea(
+      child: Container(
+        height: 80,
+        color: const Color(0xFF31A2C6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Botão de Configurações (Menu animado)
+            Expanded(
+              child: IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white, size: 30),
+                onPressed: () => _showAnimatedMenu(context),
+              ),
+            ),
 
-          // Ícone 2 (Dependente com Menu)
-          _buildIconWithMenu(
-            context: context,
-            imagePath: 'assets/old_man_smiling.png', // Verifique se o asset existe
-            size: iconSize2,
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => const Dialog(
-                  backgroundColor: Colors.transparent,
-                  // Substitua pelo seu widget de menu real
-                  child: Text("Menu de Gerenciamento Aqui", style: TextStyle(color: Colors.white)),
-                  // child: MenuGerenciamento(), 
+            // BOTÃO QUE ABRE O POPUP DOS DEPENDENTES (usando ícone padrão)
+            Expanded(
+              child: PopupMenuButton<dynamic>(
+                onSelected: (value) {
+                  if (value is Dependente) {
+                    // Ação ao clicar em um dependente da lista
+                    print('Selecionou o dependente: ${value.nome}');
+                    // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE PERFIL DO DEPENDENTE
+                    // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaPerfilDependente(dependenteId: value.id)));
+                  } else if (value == 'adicionar') {
+                    // Ação ao clicar em "Adicionar dependente"
+                    print('Navegar para Adicionar Dependente');
+                    // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE ADICIONAR DEPENDENTE
+                    // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaAdicionarDependente()));
+                  } else if (value == 'editar') {
+                    // Ação ao clicar em "Editar Dependentes"
+                    print('Navegar para Editar Dependentes');
+                    // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE EDITAR DEPENDENTES
+                    // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaEditarDependentes()));
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                    ...listaDeDependentes.map((dependente) {
+                      return PopupMenuItem<Dependente>(
+                        value: dependente,
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.person_outline,
+                              color: Colors.black54,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(dependente.nome),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    const PopupMenuDivider(),
+                    PopupMenuItem<String>(
+                      value: 'adicionar',
+                      child: Row(
+                        children: [
+                          const Text('Adicionar dependente'),
+                          const Spacer(),
+                          const Icon(Icons.add_circle, color: Colors.green),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'editar',
+                      child: Row(
+                        children: [
+                          const Text('Editar Dependentes'),
+                          const Spacer(),
+                          const Icon(Icons.edit, color: Color(0xFF31A2C6)),
+                        ],
+                      ),
+                    ),
+                  ];
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: const BorderSide(color: Color(0xFF31A2C6), width: 2),
                 ),
-              );
-            },
-          ),
+                offset: const Offset(0, -220),
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Image.asset(
+                    'assets/imagens/icone_senhor.png', // coloque o caminho da sua imagem aqui
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
 
-          // Ícone 3 (Calendário)
-          _buildNavigationIcon(
-            icon: Icons.calendar_today,
-            size: iconSize3,
-            iconColor: Colors.white,
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Navegando para o calendário')),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Função para construir o ícone com menu (GestureDetector)
-  Widget _buildIconWithMenu({
-    required BuildContext context,
-    required String imagePath,
-    required double size,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Image.asset(
-          imagePath,
-          width: size,
-          height: size,
-          errorBuilder: (context, error, stackTrace) {
-            // Um fallback caso a imagem não seja encontrada
-            return Icon(Icons.error, color: Colors.red[300], size: size);
-          },
+            // Botão de calendário
+            Expanded(
+              child: IconButton(
+                icon: const Icon(
+                  Icons.calendar_today,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                onPressed: onCalendarPressed ?? () {},
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Função para construir o ícone de navegação (IconButton)
-  Widget _buildNavigationIcon({
-    required IconData icon,
-    required double size,
-    required VoidCallback onPressed,
-    Color? iconColor,
-  }) {
-    return IconButton(
-      icon: Icon(icon, color: iconColor),
-      iconSize: size,
-      tooltip: "Ir para o calendário",
+  void _showAnimatedMenu(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Configurações',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return Transform.scale(
+          scale: Curves.easeInOut.transform(anim1.value),
+          child: Opacity(
+            opacity: Curves.easeInOut.transform(anim1.value),
+            child: Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                width: 270,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.lightBlue, width: 3),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _MenuButton(
+                      texto: 'Perfil',
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Coloque aqui a navegação para a tela correta se desejar.
+                      },
+                    ),
+                    const Divider(thickness: 2),
+                    _MenuButton(
+                      texto: 'Lembretes',
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Navegação para Lembretes
+                      },
+                    ),
+                    const Divider(thickness: 2),
+                    _MenuButton(
+                      texto: 'Saúde',
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MedicalDataScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(thickness: 2),
+                    _MenuButton(
+                      texto: 'Notificações',
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Navegação para Notificações
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Botão do menu animado
+class _MenuButton extends StatelessWidget {
+  final String texto;
+  final VoidCallback onPressed;
+
+  const _MenuButton({required this.texto, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
       onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      child: Center(
+        child: Text(
+          texto,
+          style: const TextStyle(
+            color: Color(0xFF2B5C6B),
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }
