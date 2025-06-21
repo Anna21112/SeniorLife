@@ -157,9 +157,8 @@ class CustomBottomNavBar extends StatelessWidget {
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
-                  side: const BorderSide(color: Color(0xFF31A2C6), width: 2),
+                  side: const BorderSide(color: Color(0xFF31A2C6), width: 1),
                 ),
-                offset: const Offset(0, -220),
                 child: SizedBox(
                   width: 40,
                   height: 40,
@@ -210,6 +209,7 @@ class CustomBottomNavBar extends StatelessWidget {
                   vertical: 20,
                   horizontal: 10,
                 ),
+                // ftmoon esteve aqui
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -260,7 +260,7 @@ class CustomBottomNavBar extends StatelessWidget {
             ),
           ),
         );
-      },
+      }, // https://www.reddit.com/r/NoMansSkyTheGame/comments/bv69hx/gek_cat/?tl=pt-br
     );
   }
 }
