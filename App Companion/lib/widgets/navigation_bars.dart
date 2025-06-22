@@ -36,8 +36,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Image.asset('assets/imagens/logo.png', height: 40),
           IconButton(
             icon: const Icon(Icons.person, color: Colors.white, size: 30),
-            onPressed:
-                onProfilePressed ??
+            onPressed: onProfilePressed ??
                 () {
                   Navigator.push(
                     context,
@@ -263,12 +262,13 @@ class CustomBottomNavBar extends StatelessWidget {
                     _MenuButton(
                       texto: 'Notificações',
                       onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AgendaScreen()),
-                      );
-                    },
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const AgendaScreen()),
+                        );
+                      },
                     ),
                   ],
                 ),

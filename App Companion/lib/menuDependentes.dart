@@ -9,9 +9,11 @@ class TelaAdicionarDependente extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: const SizedBox.shrink(), // Deixe vazio ou coloque outro conteúdo se quiser
+      body: const SizedBox
+          .shrink(), // Deixe vazio ou coloque outro conteúdo se quiser
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 40.0), // Ajuste o valor conforme desejar
+        padding: const EdgeInsets.only(
+            bottom: 40.0), // Ajuste o valor conforme desejar
         child: ElevatedButton.icon(
           onPressed: () {
             Navigator.push(
@@ -41,7 +43,8 @@ class TelaAdicionarDependente extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Centraliza acima da BottomBar
+      floatingActionButtonLocation: FloatingActionButtonLocation
+          .centerDocked, // Centraliza acima da BottomBar
       bottomNavigationBar: const CustomBottomNavBar(),
     );
   }

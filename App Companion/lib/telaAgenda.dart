@@ -23,10 +23,14 @@ class _ReminderScreenState extends State<ReminderScreen> {
     final may2025 = DateTime.utc(2025, 5);
     final june2025 = DateTime.utc(2025, 6, 21); // Dia atual para exemplo
     _events = ValueNotifier({
-      DateTime.utc(may2025.year, may2025.month, 15): ['Consulta com o Dr. Steve'],
+      DateTime.utc(may2025.year, may2025.month, 15): [
+        'Consulta com o Dr. Steve'
+      ],
       DateTime.utc(may2025.year, may2025.month, 23): ['Exame de Sangue'],
       // Adicionando um evento no dia de hoje para teste
-      DateTime.utc(june2025.year, june2025.month, june2025.day): ['Entregar projeto Flutter'],
+      DateTime.utc(june2025.year, june2025.month, june2025.day): [
+        'Entregar projeto Flutter'
+      ],
     });
   }
 
@@ -73,7 +77,8 @@ class _ReminderScreenState extends State<ReminderScreen> {
               child: const Text('Adicionar'),
               onPressed: () {
                 if (_eventController.text.isEmpty) return;
-                final normalizedDay = DateTime.utc(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+                final normalizedDay = DateTime.utc(
+                    _selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
                 _events.value = {
                   ..._events.value,
                   normalizedDay: [
@@ -99,7 +104,8 @@ class _ReminderScreenState extends State<ReminderScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Alinha o título à esquerda
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Alinha o título à esquerda
             children: [
               // Calendário
               Container(
@@ -143,11 +149,13 @@ class _ReminderScreenState extends State<ReminderScreen> {
                 ),
               ),
               const SizedBox(height: 24.0),
-              
+
               // Título da seção de lembretes
               Text(
                 'Lembretes do Mês', // Título alterado
-                style: Theme.of(context).textTheme.titleLarge, // Estilo um pouco maior
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge, // Estilo um pouco maior
               ),
               const SizedBox(height: 8.0),
 
@@ -165,7 +173,8 @@ class _ReminderScreenState extends State<ReminderScreen> {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('Nenhum lembrete para este mês.'), // Mensagem alterada
+                        child: Text(
+                            'Nenhum lembrete para este mês.'), // Mensagem alterada
                       ),
                     );
                   }
@@ -193,20 +202,28 @@ class _ReminderScreenState extends State<ReminderScreen> {
                             const Divider(),
                             ...events.map(
                               (event) => Card(
-                                margin: const EdgeInsets.symmetric(vertical: 4.0),
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 4.0),
                                 child: ListTile(
                                   title: Text(event),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                    icon: const Icon(Icons.remove_circle,
+                                        color: Colors.red),
                                     onPressed: () {
-                                      final normalizedDay = DateTime.utc(day.year, day.month, day.day);
-                                      final updatedEventsForDay = List<String>.from(events)..remove(event);
-                                      final currentEvents = Map<DateTime, List<String>>.from(_events.value);
+                                      final normalizedDay = DateTime.utc(
+                                          day.year, day.month, day.day);
+                                      final updatedEventsForDay =
+                                          List<String>.from(events)
+                                            ..remove(event);
+                                      final currentEvents =
+                                          Map<DateTime, List<String>>.from(
+                                              _events.value);
 
                                       if (updatedEventsForDay.isEmpty) {
                                         currentEvents.remove(normalizedDay);
                                       } else {
-                                        currentEvents[normalizedDay] = updatedEventsForDay;
+                                        currentEvents[normalizedDay] =
+                                            updatedEventsForDay;
                                       }
                                       _events.value = currentEvents;
                                     },
