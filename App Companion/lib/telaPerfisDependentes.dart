@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 
-// TODO: Crie o arquivo 'edit_profile_screen.dart' em uma pasta 'screens' e descomente a linha abaixo.
-// import 'screens/edit_profile_screen.dart';
-
 // --- Modelo de Dados ---
 class Profile {
   final int id;

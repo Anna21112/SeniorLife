@@ -4,6 +4,9 @@ import '../tela_saude.dart';
 import '../telaNotificações.dart';
 import '../telaAgenda.dart';
 import '../telaExibirPerfilDepen.dart';
+import '../telaLembretes.dart';
+import '../menuDependentes.dart';
+import '../menuAddDependente.dart';
 
 // Adicione os imports das futuras telas de dependentes aqui
 // import '../tela_adicionar_dependente.dart';
@@ -33,7 +36,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset('assets/imagens/logo.png', height: 40),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const TelaAdicionarDependente(),
+                ),
+              );
+            },
+            child: Image.asset('assets/imagens/logo.png', height: 40),
+          ),
           IconButton(
             icon: const Icon(Icons.person, color: Colors.white, size: 30),
             onPressed: onProfilePressed ??
@@ -72,8 +85,6 @@ class CustomBottomNavBar extends StatelessWidget {
     // AQUI É ONDE OS DADOS VIRIÃO DA SUA API
     // =======================================================================
     // Por enquanto, usamos uma lista estática como exemplo.
-    // No futuro, você usará um FutureBuilder ou outro gerenciador de estado
-    // para buscar esses dados e reconstruir o widget.
     final List<Dependente> listaDeDependentes = [
       Dependente(id: 1, nome: 'Rogério Almeida'),
       Dependente(id: 2, nome: 'Clark Quente'),
@@ -106,6 +117,12 @@ class CustomBottomNavBar extends StatelessWidget {
                     // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE PERFIL DO DEPENDENTE
                     // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaPerfilDependente(dependenteId: value.id)));
                   } else if (value == 'adicionar') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TelaCadastroDependente(),
+                      ),
+                    );
                     // Ação ao clicar em "Adicionar dependente"
                     print('Navegar para Adicionar Dependente');
                     // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE ADICIONAR DEPENDENTE
@@ -242,7 +259,12 @@ class CustomBottomNavBar extends StatelessWidget {
                       texto: 'Lembretes',
                       onPressed: () {
                         Navigator.pop(context);
-                        // Navegação para Lembretes
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TelaLembretes(),
+                          ),
+                        );
                       },
                     ),
                     const Divider(thickness: 2),

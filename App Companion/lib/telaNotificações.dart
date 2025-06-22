@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'widgets/navigation_bars.dart';
+import '../telaAgenda.dart';
 
 // NOVO ENUM para controlar o tipo de filtro aplicado.
 enum FilterType { todos, comum, emergencia }
@@ -329,18 +330,32 @@ class _AgendaScreenState extends State<AgendaScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF43A5B4),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text('Agenda',
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const ReminderScreen(), // ou TelaAgenda() se for esse o nome da sua tela!
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF43A5B4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Agenda',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold)),
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                   TextButton.icon(
                     onPressed:
