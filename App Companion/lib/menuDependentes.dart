@@ -9,43 +9,40 @@ class TelaAdicionarDependente extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: Column(
-        children: [
-          const SizedBox(height: 650),
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TelaCadastroDependente(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add, color: Colors.green),
-              label: const Text(
-                'Adicionar dependente',
-                style: TextStyle(color: Colors.black),
+      body: const SizedBox.shrink(), // Deixe vazio ou coloque outro conteúdo se quiser
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 40.0), // Ajuste o valor conforme desejar
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TelaCadastroDependente(),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Colors.green),
-                elevation: 3,
-                shadowColor: Colors.black26,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-              ),
+            );
+          },
+          icon: const Icon(Icons.add, color: Colors.green),
+          label: const Text(
+            'Adicionar dependente',
+            style: TextStyle(color: Colors.black),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Colors.green),
+            elevation: 3,
+            shadowColor: Colors.black26,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 10,
             ),
           ),
-          const Spacer(),
-          const CustomBottomNavBar(),
-        ],
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Centraliza acima da BottomBar
+      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }

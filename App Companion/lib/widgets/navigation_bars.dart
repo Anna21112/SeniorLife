@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../telaPerfilAcompanhante.dart';
 import '../tela_saude.dart';
+import '../telaNotificações.dart';
+import '../telaAgenda.dart';
+import '../telaExibirPerfilDepen.dart';
 
 // Adicione os imports das futuras telas de dependentes aqui
 // import '../tela_adicionar_dependente.dart';
@@ -178,7 +181,12 @@ class CustomBottomNavBar extends StatelessWidget {
                   color: Colors.white,
                   size: 30,
                 ),
-                onPressed: onCalendarPressed ?? () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ReminderScreen()),
+                  );
+                },
               ),
             ),
           ],
@@ -222,7 +230,12 @@ class CustomBottomNavBar extends StatelessWidget {
                       texto: 'Perfil',
                       onPressed: () {
                         Navigator.pop(context);
-                        // Coloque aqui a navegação para a tela correta se desejar.
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
                       },
                     ),
                     const Divider(thickness: 2),
@@ -250,9 +263,12 @@ class CustomBottomNavBar extends StatelessWidget {
                     _MenuButton(
                       texto: 'Notificações',
                       onPressed: () {
-                        Navigator.pop(context);
-                        // Navegação para Notificações
-                      },
+                      Navigator.pop(context);
+                      Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AgendaScreen()),
+                      );
+                    },
                     ),
                   ],
                 ),
