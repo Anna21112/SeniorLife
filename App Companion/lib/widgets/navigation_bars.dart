@@ -9,12 +9,7 @@ import '../menuDependentes.dart';
 import '../menuAddDependente.dart';
 
 // Adicione os imports das futuras telas de dependentes aqui
-// import '../tela_adicionar_dependente.dart';
-// import '../tela_editar_dependentes.dart';
-// import '../tela_perfil_dependente.dart';
 
-// Modelo para representar um dependente.
-// No futuro, você irá popular uma lista desses objetos com os dados da sua API.
 class Dependente {
   final int id;
   final String nome;
@@ -102,7 +97,7 @@ class CustomBottomNavBar extends StatelessWidget {
             // Botão de Configurações (Menu animado)
             Expanded(
               child: IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white, size: 30),
+                icon: const Icon(Icons.menu, color: Colors.white, size: 30),
                 onPressed: () => _showAnimatedMenu(context),
               ),
             ),
@@ -114,8 +109,6 @@ class CustomBottomNavBar extends StatelessWidget {
                   if (value is Dependente) {
                     // Ação ao clicar em um dependente da lista
                     print('Selecionou o dependente: ${value.nome}');
-                    // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE PERFIL DO DEPENDENTE
-                    // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaPerfilDependente(dependenteId: value.id)));
                   } else if (value == 'adicionar') {
                     Navigator.push(
                       context,
@@ -125,13 +118,9 @@ class CustomBottomNavBar extends StatelessWidget {
                     );
                     // Ação ao clicar em "Adicionar dependente"
                     print('Navegar para Adicionar Dependente');
-                    // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE ADICIONAR DEPENDENTE
-                    // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaAdicionarDependente()));
                   } else if (value == 'editar') {
                     // Ação ao clicar em "Editar Dependentes"
                     print('Navegar para Editar Dependentes');
-                    // NAVEGAÇÃO: COLOQUE AQUI O CAMINHO PARA A TELA DE EDITAR DEPENDENTES
-                    // Exemplo: Navigator.push(context, MaterialPageRoute(builder: (_) => TelaEditarDependentes()));
                   }
                 },
                 itemBuilder: (BuildContext context) {
@@ -182,7 +171,7 @@ class CustomBottomNavBar extends StatelessWidget {
                   width: 40,
                   height: 40,
                   child: Image.asset(
-                    'assets/imagens/icone_senhor.png', // coloque o caminho da sua imagem aqui
+                    'assets/imagens/icone_senhor.png',
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -243,7 +232,7 @@ class CustomBottomNavBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _MenuButton(
-                      texto: 'Perfil',
+                      texto: 'Perfil do Dependente',
                       onPressed: () {
                         Navigator.pop(context);
                         Navigator.push(
