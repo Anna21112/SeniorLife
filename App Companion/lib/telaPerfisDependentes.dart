@@ -1,41 +1,47 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 // --- Modelo de Dados ---
 class Profile {
-  final int id;
-  String name;
+  final String id;
+  final String name;
 
   Profile({required this.id, required this.name});
+
+  factory Profile.fromJson(Map<String, dynamic> json) {
+    return Profile(
+      id: json['id'],
+      name: json['nome'],
+    );
+  }
 }
 
 // --- Simulação do Serviço de API ---
 class ProfileApiService {
-  // Lista em memória para simular um banco de dados
-  static final List<Profile> _profiles = [
-    Profile(id: 1, name: 'Rogério Almeida'),
-    Profile(id: 2, name: 'Clark Quente'),
-    Profile(id: 3, name: 'Chico Moedas'),
-  ];
-
-  // Simula a busca de perfis da API
   static Future<List<Profile>> getProfiles() async {
-    await Future.delayed(const Duration(seconds: 2)); // Simula latência de rede
-    return List.from(_profiles);
-  }
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Token não encontrado. Faça login novamente.');
+    }
 
-  // Simula a exclusão de um perfil
-  static Future<void> deleteProfile(int id) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    _profiles.removeWhere((profile) => profile.id == id);
-  }
+    final response = await http.get(
+      Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-  // Simula a atualização de um perfil
-  static Future<void> updateProfile(int id, String newName) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final index = _profiles.indexWhere((profile) => profile.id == id);
-    if (index != -1) {
-      _profiles[index].name = newName;
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final dependentes = data['data']['dependentes'] as List;
+      return dependentes.map((json) => Profile.fromJson(json)).toList();
+    } else {
+      throw Exception('Erro ao buscar dependentes');
     }
   }
 }

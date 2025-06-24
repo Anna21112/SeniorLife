@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'widgets/navigation_bars.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TelaCadastroDependente extends StatefulWidget {
   const TelaCadastroDependente({super.key});
@@ -15,6 +16,11 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
   final _idadeController = TextEditingController();
   final _enderecoController = TextEditingController();
   final _restricoesController = TextEditingController();
+  final _senhaController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _emergenciaController = TextEditingController();
+  final _alergiaController = TextEditingController();
+
 
   bool _salvando = false;
 
@@ -24,28 +30,58 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
     _idadeController.dispose();
     _enderecoController.dispose();
     _restricoesController.dispose();
+    _senhaController.dispose();
+    _emailController.dispose();
+    _emergenciaController.dispose();
+    _alergiaController.dispose();
     super.dispose();
   }
 
-  Future<void> salvarDependente(
-      String nome, String idade, String endereco, String restricoes) async {
-    final url =
-        Uri.parse('https://suaapi.com/dependentes'); // Troque pela sua URL real
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'nome': nome,
-        'idade': idade,
-        'endereco': endereco,
-        'restricoes': restricoes,
-      }),
-    );
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Erro ao salvar dependente');
-    }
+  Future<void> salvarDependente() async {
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  // 1. Salva na tabela dependente
+  final urlDependente = Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/Cadastro');
+  final responseDependente = await http.post(
+    urlDependente,
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+    body: jsonEncode({
+      'nome': _nomeController.text,
+      'email': _emailController.text,
+      'senha': _senhaController.text,
+    }),
+  );
+  if (responseDependente.statusCode != 200 && responseDependente.statusCode != 201) {
+    throw Exception('Erro ao salvar dependente');
   }
 
+  final dependenteData = jsonDecode(responseDependente.body);
+  final dependenteId = dependenteData['data']?['dependente']?['id'] ?? dependenteData['id'];
+
+  print('ID do dependente salvo: $dependenteId');
+
+  // 2. Salva as informações adicionais (pegue o id do dependente salvo, se necessário)
+  final urlInfo = Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/emergency/');
+  final responseInfo = await http.post(
+    urlInfo,
+    headers: {'Content-Type': 'application/json','Authorization': 'Bearer $token'},
+    body: jsonEncode({
+      'dependente_id': dependenteId,
+      'nome': _nomeController.text,
+      'idade': _idadeController.text,
+      'alergias': _alergiaController.text,
+      'historico': _restricoesController.text,
+      'contato_emergencia': _emergenciaController.text,
+    }),
+  );
+  if (responseInfo.statusCode != 200 && responseInfo.statusCode != 201) {
+    throw Exception('Erro ao salvar informações do dependente');
+  }
+}
+
+    
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,8 +99,16 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
             const SizedBox(height: 10),
             _campoTexto(label: 'Endereço:', controller: _enderecoController),
             const SizedBox(height: 10),
+            _campoTexto(label: 'Senha:', controller: _senhaController),
+            const SizedBox(height: 10),
+            _campoTexto(label: 'Email:', controller: _emailController),
+            const SizedBox(height: 10),
+            _campoTexto(label: 'Contato de emergencia:', controller: _emergenciaController),
+            const SizedBox(height: 10),
+            _campoTexto(label: 'Alergias:', controller: _alergiaController),
+            const SizedBox(height: 20),
             _campoTextoGrande(
-                label: 'Restrições:', controller: _restricoesController),
+                label: 'Histórico:', controller: _restricoesController),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _salvando
@@ -72,12 +116,7 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
                   : () async {
                       setState(() => _salvando = true);
                       try {
-                        await salvarDependente(
-                          _nomeController.text,
-                          _idadeController.text,
-                          _enderecoController.text,
-                          _restricoesController.text,
-                        );
+                        await salvarDependente();
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content: Text('Dependente salvo com sucesso!')),

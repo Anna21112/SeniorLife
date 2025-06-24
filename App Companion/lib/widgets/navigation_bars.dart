@@ -8,13 +8,24 @@ import '../telaLembretes.dart';
 import '../menuDependentes.dart';
 import '../menuAddDependente.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 // Adicione os imports das futuras telas de dependentes aqui
 
 class Dependente {
-  final int id;
+  final String id;
   final String nome;
 
   Dependente({required this.id, required this.nome});
+
+  factory Dependente.fromJson(Map<String, dynamic> json) {
+    return Dependente(
+      id: json['id'],
+      nome: json['nome'],
+    );
+  }
 }
 
 // Barra superior reutilizável com logo e botão de usuário
@@ -64,7 +75,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 // Rodapé reutilizável com ícones e animação do menu
-class CustomBottomNavBar extends StatelessWidget {
+class CustomBottomNavBar extends StatefulWidget {
   final VoidCallback? onProfilePressed;
   final VoidCallback? onCalendarPressed;
 
@@ -75,17 +86,58 @@ class CustomBottomNavBar extends StatelessWidget {
   });
 
   @override
+  State<CustomBottomNavBar> createState() => _CustomBottomNavBarState();
+  }
+
+  class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
+  List<Dependente> listaDeDependentes = [];
+  bool carregando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarDependentes();
+  }
+
+  Future<void> buscarDependentes() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      print('Token recuperado: $token');
+      if (token == null || token.isEmpty) {
+      print('Token não encontrado, abortando requisição.');
+      return;
+      }
+      print('Vai fazer requisição para dependents');
+      final response = await http.get(
+        Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+          'ngrok-skip-browser-warning': 'true',
+        },
+      );
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final dependentes = data['data']['dependentes'] as List;
+        setState(() {
+          listaDeDependentes = dependentes.map((json) => Dependente.fromJson(json)).toList();
+          carregando = false;
+        });
+      } else {
+        setState(() => carregando = false);
+      }
+    } catch (e) {
+      print('Erro ao buscar dependentes: $e');
+      setState(() => carregando = false);
+    }
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-    // =======================================================================
-    // AQUI É ONDE OS DADOS VIRIÃO DA SUA API
-    // =======================================================================
-    // Por enquanto, usamos uma lista estática como exemplo.
-    final List<Dependente> listaDeDependentes = [
-      Dependente(id: 1, nome: 'Rogério Almeida'),
-      Dependente(id: 2, nome: 'Clark Quente'),
-      Dependente(id: 3, nome: 'Chico Moedas'),
-    ];
-    // =======================================================================
 
     return SafeArea(
       child: Container(
@@ -107,15 +159,15 @@ class CustomBottomNavBar extends StatelessWidget {
               child: PopupMenuButton<dynamic>(
                 onSelected: (value) {
                   if (value is Dependente) {
-                    // Ação ao clicar em um dependente da lista
-                    print('Selecionou o dependente: ${value.nome}');
-                  } else if (value == 'adicionar') {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const TelaCadastroDependente(),
+                        builder: (_) => TelaExibirPerfilDepen(dependente: value),
                       ),
                     );
+                    // Ação ao clicar em um dependente da lista
+                    print('Selecionou o dependente: ${value.nome}');
+                  } else if (value == 'adicionar'){
                     // Ação ao clicar em "Adicionar dependente"
                     print('Navegar para Adicionar Dependente');
                   } else if (value == 'editar') {
@@ -238,7 +290,7 @@ class CustomBottomNavBar extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const ProfileScreen(),
+                           builder: (_) => TelaExibirPerfilDepen(dependente: listaDeDependentes.isNotEmpty ? listaDeDependentes.first : Dependente(id: '', nome: '')),
                           ),
                         );
                       },

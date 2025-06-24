@@ -36,13 +36,13 @@ router.post('/Cadastro', autenticarAcompanhante, cadastrar);
 router.post('/Login', login);
 
 // Listar todos os dependentes (GET)
-router.get('/', consultar);
+router.get('/',  autenticarAcompanhante, consultar);
 
 // Editar dependente (PUT)
-router.put('/:id', editar);
+router.put('/:id', autenticarAcompanhante, editar);
 
 // Excluir dependente (DELETE)
-router.delete('/:id', excluir);
+router.delete('/:id', autenticarAcompanhante, excluir);
 
 // Export the router to be mounted by the main application.
 module.exports = router;

@@ -1,4 +1,8 @@
-const db = require('../Config/conn.js');
+const { postgresConnection } = require('../Config/instaceConn.js'); // Adjust path if necessary
+
+// 2. Get the Knex instance from the postgresConnection.
+//    'db' is now your Knex instance, ready for use.
+const db = postgresConnection.getConnection();
 
 exports.criarEmergencia = async (dados) => {
   return await db('emergencia').insert(dados).returning('*');

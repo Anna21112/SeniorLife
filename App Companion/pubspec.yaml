@@ -21,6 +21,8 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
+  shared_preferences: ^2.2.2
+
 # A seção a seguir força o uso de uma versão específica de um pacote.
 # Usado aqui para resolver o conflito entre table_calendar e a sua versão do intl.
 dependency_overrides:

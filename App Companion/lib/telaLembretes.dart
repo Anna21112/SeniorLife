@@ -1,10 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'widgets/navigation_bars.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Lembrete {
+  String id;
+  String titulo;
   String descricao;
+  String type; // <-- Adicione aqui
   bool concluido;
-  Lembrete({required this.descricao, this.concluido = false});
+  Lembrete({
+    required this.id,
+    required this.titulo,
+    required this.descricao,
+    required this.type,
+    this.concluido = false,
+  });
 }
 
 class TelaLembretes extends StatefulWidget {
@@ -14,14 +28,120 @@ class TelaLembretes extends StatefulWidget {
   State<TelaLembretes> createState() => _TelaLembretesState();
 }
 
-class _TelaLembretesState extends State<TelaLembretes> {
-  int _abaSelecionada = 0;
 
-  final List<Lembrete> _ativFisica = [
-    Lembrete(descricao: 'FAZER 20 FLEXÕES'),
-    Lembrete(descricao: 'ALONGAR AS COSTAS PELO MENOS 1 VEZ'),
-    Lembrete(descricao: 'FAZER 30 POLICHINELOS'),
-  ];
+
+class _TelaLembretesState extends State<TelaLembretes> {
+
+
+Future<List<Lembrete>> buscarLembretesPorTipo(String tipo) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final dependentePadraoId = prefs.getString('dependente_padrao_id');
+
+  final response = await http.get(
+    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity?type=$tipo'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    },
+  );
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    print('Resposta da API: $data');
+    final lembretes = data['data']['activity'] as List;
+    return lembretes.map((json) => Lembrete(
+      id: json['_id'] ?? '',
+      titulo: json['title'] ?? '',
+      descricao: json['description'] ?? '',
+      type: json['type'] ?? '', 
+      concluido:  false,
+    )).toList();
+  } else {
+    throw Exception('Erro ao buscar lembretes');
+  }
+}
+
+Future<void> salvarLembreteNoBackend(Lembrete lembrete, String tipo) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final dependentePadraoId = prefs.getString('dependente_padrao_id');
+
+  final body = jsonEncode({
+    'title': lembrete.titulo,
+    'description': lembrete.descricao,
+    'type': tipo,
+    'schedule': DateTime.now().toUtc().toIso8601String(),
+  });
+  print('Enviando body: $body'); // <-- Adicione este print
+
+  final response = await http.post(
+    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    },
+    body: body,
+  );
+
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    print('Erro: ${response.body}');
+    throw Exception('Erro ao salvar lembrete');
+  }
+}
+
+Future<void> excluirLembreteNoBackend(String id, String tipo) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final dependentePadraoId = prefs.getString('dependente_padrao_id');
+
+  final response = await http.delete(
+    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity/$id'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    },
+  );
+  if (response.statusCode != 200 && response.statusCode != 204) {
+    throw Exception('Erro ao excluir lembrete');
+  }
+}
+Future<void> editarLembreteNoBackend(Lembrete lembrete, String tipo) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final dependentePadraoId = prefs.getString('dependente_padrao_id');
+
+  final response = await http.put(
+    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity/${lembrete.id}'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    },
+    body: jsonEncode({
+      'title': lembrete.titulo,
+      'description': lembrete.descricao,
+      'type': tipo,
+      'schedule': DateTime.now().toUtc().toIso8601String(),
+    }),
+  );
+  print('PUT body: ${jsonEncode({
+  'title': lembrete.titulo,
+  'description': lembrete.descricao,
+  'type': tipo,
+  'schedule': DateTime.now().toUtc().toIso8601String(),
+})}');
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Erro ao editar lembrete');
+  }
+}
+
+int _abaSelecionada = 0;
+
+  final List<Lembrete> _ativFisica = [];
   final List<Lembrete> _alimentacao = [];
   final List<Lembrete> _medicacao = [];
 
@@ -51,52 +171,95 @@ class _TelaLembretesState extends State<TelaLembretes> {
     }
   }
 
-  void _adicionarOuEditarLembrete({Lembrete? lembrete, int? index}) {
-    final controller = TextEditingController(text: lembrete?.descricao ?? '');
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title:
-            Text(lembrete == null ? 'Adicionar Lembrete' : 'Editar Lembrete'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'Descrição'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+void _adicionarOuEditarLembrete({Lembrete? lembrete, int? index}) {
+  final tituloController = TextEditingController(text: lembrete?.titulo ?? '');
+  final descricaoController = TextEditingController(text: lembrete?.descricao ?? '');
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(lembrete == null ? 'Adicionar Lembrete' : 'Editar Lembrete'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: tituloController,
+            decoration: const InputDecoration(labelText: 'Título'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              final texto = controller.text.trim();
-              if (texto.isEmpty) return;
-              setState(() {
-                if (lembrete == null) {
-                  _lembretesAtuais.add(Lembrete(descricao: texto));
-                } else if (index != null) {
-                  _lembretesAtuais[index] = Lembrete(
-                    descricao: texto,
-                    concluido: lembrete.concluido,
-                  );
-                }
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Salvar'),
+          TextField(
+            controller: descricaoController,
+            decoration: const InputDecoration(labelText: 'Descrição'),
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+  onPressed: () async {
+    final titulo = tituloController.text.trim();
+    final descricao = descricaoController.text.trim();
+    if (titulo.isEmpty || descricao.isEmpty) return;
+    if (lembrete == null) {
+      final tipo = _abaSelecionada == 0
+          ? 'atividade fisica'
+          : _abaSelecionada == 1
+              ? 'alimentacao'
+              : 'medicacao';
+      final novoLembrete = Lembrete(id: '', titulo: titulo, descricao: descricao, type: tipo);
+      await salvarLembreteNoBackend(novoLembrete, tipo);
+      final lembretes = await buscarLembretesPorTipo(tipo);
+      setState(() {
+        _lembretesAtuais
+          ..clear()
+          ..addAll(lembretes);
+      });
+    } else if (index != null) {
+      final tipo = _abaSelecionada == 0
+          ? 'atividade fisica'
+          : _abaSelecionada == 1
+              ? 'alimentacao'
+              : 'medicacao';
+      final editado = Lembrete(
+        id: lembrete.id,
+        titulo: titulo,
+        descricao: descricao,
+        type: tipo,
+        concluido: lembrete.concluido,
+      );
+      await editarLembreteNoBackend(editado, tipo);
+      final lembretes = await buscarLembretesPorTipo(tipo);
+      setState(() {
+        _lembretesAtuais
+          ..clear()
+          ..addAll(lembretes);
+      });
+    }
+    Navigator.pop(context);
+  },
+  child: const Text('Salvar'),
+),
+      ],
+    ),
+  );
+}
 
-  void _removerLembrete(int index) {
-    setState(() {
-      _lembretesAtuais.removeAt(index);
-    });
-  }
-
+ void _removerLembrete(int index) async {
+  final lembrete = _lembretesAtuais[index];
+  final tipo = _abaSelecionada == 0
+      ? 'atividade fisica'
+      : _abaSelecionada == 1
+          ? 'alimentacao'
+          : 'medicacao';
+  await excluirLembreteNoBackend(lembrete.id, tipo);
+  final lembretes = await buscarLembretesPorTipo(tipo);
+  setState(() {
+    _lembretesAtuais
+      ..clear()
+      ..addAll(lembretes);
+  });
+}
   void _alternarConclusao(int index) {
     setState(() {
       _lembretesAtuais[index].concluido = !_lembretesAtuais[index].concluido;
@@ -119,17 +282,35 @@ class _TelaLembretesState extends State<TelaLembretes> {
                 _AbaBotao(
                   texto: 'Atv. Físicas',
                   selecionada: _abaSelecionada == 0,
-                  onTap: () => setState(() => _abaSelecionada = 0),
+                  onTap: () async {
+                   setState(() => _abaSelecionada = 0);
+                   final lembretes = await buscarLembretesPorTipo('atividade fisica');
+                   setState(() => _ativFisica
+                    ..clear()
+                    ..addAll(lembretes));
+                },
                 ),
                 _AbaBotao(
                   texto: 'Alimentação',
                   selecionada: _abaSelecionada == 1,
-                  onTap: () => setState(() => _abaSelecionada = 1),
+                  onTap: () async {
+                   setState(() => _abaSelecionada = 1);
+                   final lembretes = await buscarLembretesPorTipo('alimentacao');
+                   setState(() => _alimentacao
+                   ..clear()
+                   ..addAll(lembretes));
+                  },
                 ),
                 _AbaBotao(
                   texto: 'Medicação',
                   selecionada: _abaSelecionada == 2,
-                  onTap: () => setState(() => _abaSelecionada = 2),
+                onTap: () async {
+                  setState(() => _abaSelecionada = 2);
+                  final lembretes = await buscarLembretesPorTipo('medicacao');
+                  setState(() => _medicacao
+                    ..clear()
+                    ..addAll(lembretes));
+                },
                 ),
               ],
             ),
@@ -155,15 +336,8 @@ class _TelaLembretesState extends State<TelaLembretes> {
                           value: lembrete.concluido,
                           onChanged: (_) => _alternarConclusao(index),
                         ),
-                        title: Text(
-                          lembrete.descricao,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            decoration: lembrete.concluido
-                                ? TextDecoration.lineThrough
-                                : null,
-                          ),
-                        ),
+                        title: Text(lembrete.titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(lembrete.descricao),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

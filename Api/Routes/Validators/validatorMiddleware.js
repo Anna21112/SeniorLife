@@ -64,7 +64,7 @@ const validateUpdateActivity = [
     .notEmpty().withMessage('Title cannot be empty if provided.'), // If provided, it cannot be empty.
   body('type')
     .optional()
-    .isIn(['atividade fisica', 'alimentação', 'medicação'])
+    .isIn(['atividade fisica', 'alimentacao', 'medicacao'])
     .withMessage('Invalid activity type.'),
   body('schedule')
     .optional()

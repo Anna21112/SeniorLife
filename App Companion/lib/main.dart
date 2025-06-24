@@ -7,6 +7,8 @@ import 'cadastro.dart';
 import 'esqueciSenha.dart';
 import 'menuDependentes.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -46,6 +48,7 @@ class _TelaLoginState extends State<TelaLogin> {
   Future<void> _fazerLogin() async {
     final email = _emailController.text.trim();
     final senha = _senhaController.text.trim();
+    
 
     if (email.isEmpty || senha.isEmpty) {
       _mostrarErro('Preencha todos os campos.');
@@ -58,12 +61,18 @@ class _TelaLoginState extends State<TelaLogin> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://suaapi.com/login'), // Substitua pela sua URL
+        Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/caregivers/login'), // Substitua pela sua URL
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'senha': senha}),
       );
 
       if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['token']; // ajuste se o nome do campo for diferente
+
+        // Salva o token
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const TelaAdicionarDependente()),

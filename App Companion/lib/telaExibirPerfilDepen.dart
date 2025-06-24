@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'widgets/navigation_bars.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 // Modelo para representar os dados do usuário que vêm da API.
 class User {
   String name;
@@ -36,14 +40,16 @@ class User {
   }
 }
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class TelaExibirPerfilDepen extends StatefulWidget {
+  final Dependente dependente;
+
+  const TelaExibirPerfilDepen({super.key, required this.dependente});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<TelaExibirPerfilDepen> createState() => _TelaExibirPerfilDepenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _TelaExibirPerfilDepenState extends State<TelaExibirPerfilDepen> {
   // Futuro para armazenar os dados do usuário que virão da API.
   late Future<User> _userFuture;
 
@@ -63,36 +69,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _userFuture = _fetchUserData();
   }
 
-  Future<User> _fetchUserData() async {
-    // Simula um delay de rede de 2 segundos.
-    await Future.delayed(const Duration(seconds: 2));
+ Future<User> _fetchUserData() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final dependenteId = widget.dependente.id;
 
-    // ** SUBSTITUA ESTE BLOCO PELO SEU CÓDIGO DE CHAMADA DE API (GET) **
+  final response = await http.get(
+    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/emergency/$dependenteId'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final emergency = data['data'];
+    // Ajuste os campos conforme o retorno da sua API!
     return User(
-      name: 'Rogério Almeida',
-      age: 34,
-      address: 'Av. Brasil, 123 - Centro, São Paulo - SP',
-      phones: ['(11) 98765-4321', '(11) 5555-4444'],
+      name: emergency['nome'] ?? '',
+      age: emergency['idade'] ?? 0,
+      address: emergency['alergias'] ?? '',
+      phones: emergency['contato_emergencia'] != null
+    ? [emergency['contato_emergencia'].toString()]
+    : [],
     );
+  } else {
+    throw Exception('Erro ao buscar dados do dependente');
   }
+}
 
   Future<void> _updateUserData(User user) async {
-    // Mostra um indicador de carregamento
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Salvando alterações...')));
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final dependenteId = widget.dependente.id;
 
-    // Simula um delay de rede de 2 segundos.
-    await Future.delayed(const Duration(seconds: 2));
+  final response = await http.put(
+    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/emergency/$dependenteId'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'ngrok-skip-browser-warning': 'true',
+    },
+    body: jsonEncode({
+      'nome': user.name,
+      'idade': user.age,
+      'alergias': user.address,
+      'contato_emergencia': user.phones.isNotEmpty ? user.phones.first : '',
+    }),
+  );
 
-    // ** SUBSTITUA ESTE BLOCO PELO SEU CÓDIGO DE CHAMADA DE API (PUT/POST) **
-    print('Dados a serem enviados para a API:');
-    print(user.toJson());
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Alterações salvas com sucesso!')));
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Erro ao atualizar dados do dependente');
   }
-
+}
   void _toggleEditMode(User currentUser) {
     setState(() {
       if (_isEditing) {
@@ -234,7 +265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         _buildInfoRow('Nome', user.name),
         _buildInfoRow('Idade', user.age.toString()),
-        _buildInfoRow('Endereço', user.address),
+        _buildInfoRow('Alergias', user.address),
         _buildInfoRow('Telefones', user.phones.join('\n')),
       ],
     );
@@ -245,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         _buildTextFormField(_ageController, 'Idade',
             keyboardType: TextInputType.number),
-        _buildTextFormField(_addressController, 'Endereço'),
+        _buildTextFormField(_addressController, 'Alergias'),
         _buildTextFormField(
             _phonesController, 'Telefones (separados por vírgula)'),
       ],
