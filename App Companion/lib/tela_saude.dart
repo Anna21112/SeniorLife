@@ -401,63 +401,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: FutureBuilder<String>(
-          future: _userNameFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(text: 'Acompanhe os dados médicos de\n'),
-                    TextSpan(
-                      text: 'Carregando...',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black, fontSize: 18),
-              );
-            } else if (snapshot.hasError) {
-              return const Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(text: 'Acompanhe os dados médicos de\n'),
-                    TextSpan(
-                      text: 'Erro ao carregar',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black, fontSize: 18),
-              );
-            } else if (snapshot.hasData) {
-              return Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(text: 'Acompanhe os dados médicos de\n'),
-                    TextSpan(
-                      text: snapshot.data!,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black, fontSize: 18),
-              );
-            }
-            return const Text('');
-          },
-        ),
-      ),
+      appBar: const CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

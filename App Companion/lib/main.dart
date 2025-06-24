@@ -18,16 +18,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Senior Life',
       debugShowCheckedModeBanner: false,
-      home: TelaLogin(),
-      localizationsDelegates: [
+      home: const TelaLogin(),
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [Locale('pt', 'BR'), Locale('en', 'US')],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
     );
   }
 }
