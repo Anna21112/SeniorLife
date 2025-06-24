@@ -63,9 +63,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _userFuture = _fetchUserData();
   }
 
-  // #######################################################################
-  // ## PONTO DE INTEGRAÇÃO DA API (GET) ##
-  // #######################################################################
   Future<User> _fetchUserData() async {
     // Simula um delay de rede de 2 segundos.
     await Future.delayed(const Duration(seconds: 2));
@@ -79,17 +76,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // #######################################################################
-  // ## PONTO DE INTEGRAÇÃO DA API (PUT/POST) ##
-  // #######################################################################
   Future<void> _updateUserData(User user) async {
     // Mostra um indicador de carregamento
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Salvando alterações...')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Salvando alterações...')));
 
     // Simula um delay de rede de 2 segundos.
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // ** SUBSTITUA ESTE BLOCO PELO SEU CÓDIGO DE CHAMADA DE API (PUT/POST) **
     print('Dados a serem enviados para a API:');
     print(user.toJson());
@@ -107,24 +101,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           name: _nameController.text,
           age: int.tryParse(_ageController.text) ?? currentUser.age,
           address: _addressController.text,
-          phones: _phonesController.text.split(',').map((p) => p.trim()).toList(),
+          phones:
+              _phonesController.text.split(',').map((p) => p.trim()).toList(),
         );
 
         _updateUserData(updatedUser).then((_) {
-           setState(() {
-             _userFuture = Future.value(updatedUser);
-           });
+          setState(() {
+            _userFuture = Future.value(updatedUser);
+          });
         }).catchError((error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erro ao salvar: $error')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Erro ao salvar: $error')));
         });
-
       } else {
         // Se estava visualizando, agora vai editar
         _nameController = TextEditingController(text: currentUser.name);
-        _ageController = TextEditingController(text: currentUser.age.toString());
+        _ageController =
+            TextEditingController(text: currentUser.age.toString());
         _addressController = TextEditingController(text: currentUser.address);
-        _phonesController = TextEditingController(text: currentUser.phones.join(', '));
+        _phonesController =
+            TextEditingController(text: currentUser.phones.join(', '));
       }
       _isEditing = !_isEditing;
     });
@@ -144,7 +140,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     // O Scaffold é o corpo principal. É aqui que você integra suas barras.
-    return Scaffold( appBar: const CustomAppBar(),
+    return Scaffold(
+      appBar: const CustomAppBar(),
       // O FutureBuilder é usado para construir a interface com base no estado do futuro.
       body: FutureBuilder<User>(
         future: _userFuture,
@@ -154,13 +151,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar perfil: ${snapshot.error}'));
+            return Center(
+                child: Text('Erro ao carregar perfil: ${snapshot.error}'));
           }
 
           if (snapshot.hasData) {
             final user = snapshot.data!;
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -182,20 +181,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Center(
                         child: _isEditing
                             ? Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 90.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 90.0),
                                 child: TextField(
                                   controller: _nameController,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                                  decoration: const InputDecoration.collapsed(hintText: 'Nome'),
+                                  style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                  decoration: const InputDecoration.collapsed(
+                                      hintText: 'Nome'),
                                 ),
                               )
                             : Text(
                                 user.name,
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
                               ),
                       ),
-                      
                       Align(
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
@@ -212,14 +215,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 24),
 
                   // Seção de Informações
-                  _isEditing
-                      ? _buildEditForm()
-                      : _buildInfoDisplay(user),
+                  _isEditing ? _buildEditForm() : _buildInfoDisplay(user),
                 ],
               ),
             );
           }
-          return const Center(child: Text('Nenhum dado de usuário encontrado.'));
+          return const Center(
+              child: Text('Nenhum dado de usuário encontrado.'));
         },
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
@@ -241,9 +243,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildEditForm() {
     return Column(
       children: [
-        _buildTextFormField(_ageController, 'Idade', keyboardType: TextInputType.number),
+        _buildTextFormField(_ageController, 'Idade',
+            keyboardType: TextInputType.number),
         _buildTextFormField(_addressController, 'Endereço'),
-        _buildTextFormField(_phonesController, 'Telefones (separados por vírgula)'),
+        _buildTextFormField(
+            _phonesController, 'Telefones (separados por vírgula)'),
       ],
     );
   }
@@ -264,8 +268,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-   Widget _buildTextFormField(TextEditingController controller, String label, {TextInputType keyboardType = TextInputType.text}) {
-     return Padding(
+  Widget _buildTextFormField(TextEditingController controller, String label,
+      {TextInputType keyboardType = TextInputType.text}) {
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
@@ -273,7 +278,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
         ),
       ),
     );

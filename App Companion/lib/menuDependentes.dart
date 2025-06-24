@@ -9,11 +9,9 @@ class TelaAdicionarDependente extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: const SizedBox
-          .shrink(), // Deixe vazio ou coloque outro conteúdo se quiser
+      body: const SizedBox.shrink(),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(
-            bottom: 40.0), // Ajuste o valor conforme desejar
+        padding: const EdgeInsets.only(bottom: 40.0),
         child: ElevatedButton.icon(
           onPressed: () {
             Navigator.push(

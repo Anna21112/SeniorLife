@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
 
 // --- Modelo de Dados ---
 class Profile {
@@ -212,15 +211,6 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                       ),
                       // AÇÃO: Navega para a tela de edição que você irá criar
                       onPressed: () {
-                        // O código abaixo irá causar um erro até que a tela EditProfileScreen seja criada e importada.
-                        /*
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                EditProfileScreen(profile: profile),
-                          ),
-                        );
-                        */
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Navegando para a tela de edição...'),
