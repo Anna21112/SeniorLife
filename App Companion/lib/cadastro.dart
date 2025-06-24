@@ -14,8 +14,8 @@ class TelaCadastro extends StatelessWidget {
             Navigator.pop(context);
           },
           style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(Color(0xFF7AC77E)),
-            shape: WidgetStateProperty.all(CircleBorder()),
+            backgroundColor: WidgetStateProperty.all(const Color(0xFF7AC77E)),
+            shape: WidgetStateProperty.all(const CircleBorder()),
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -64,9 +64,9 @@ class TelaCadastro extends StatelessWidget {
           ),
         ],
       ),
-      child: SingleChildScrollView(
+      child: const SingleChildScrollView(
         child: Column(
-          children: const [
+          children: [
             SizedBox(height: 5),
             Text(
               'Cadastro',

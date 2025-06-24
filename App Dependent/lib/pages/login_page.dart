@@ -39,20 +39,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final url = Uri.parse(
-        'https://sua-api.com.br/login',
-      ); // <<< SUBSTITUA AQUI
-
-      // --- CONTRATO DE DADOS (JSON): ENVIO PARA API DE LOGIN ---
-      // Ao clicar em Entrar, o Flutter monta e envia para a API um JSON
-      // com o seguinte formato:
-      //
-      // {
-      //   "email": "email_digitado_pelo_usuario@email.com",
-      //   "senha": "senha_digitada_pelo_usuario"
-      // }
-      //
-      // O backend deve estar preparado para receber um objeto com essas chaves.
-      // -----------------------------------------------------------
+        'https://3568-2804-61ac-110b-8200-3c09-c58d-5b94-bf7a.ngrok-free.app/api/dependents/Login',
+      );
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
@@ -74,6 +62,12 @@ class _LoginPageState extends State<LoginPage> {
         // -------------------------------------------------------------
         final responseData = jsonDecode(response.body);
         final userIdFromApi = responseData['userId'];
+        final userTokenFromApi = responseData['token'];
+
+        if (userTokenFromApi == null) {
+          _showErrorSnackbar('Resposta inválida do servidor (userToken ausente).');
+          return;
+        }
 
         if (userIdFromApi == null) {
           _showErrorSnackbar('Resposta inválida do servidor (userId ausente).');
@@ -82,6 +76,7 @@ class _LoginPageState extends State<LoginPage> {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId', userIdFromApi);
+        await prefs.setString('userToken', userTokenFromApi);
         await prefs.setInt(
           'lastSessionTimestamp',
           DateTime.now().millisecondsSinceEpoch,
