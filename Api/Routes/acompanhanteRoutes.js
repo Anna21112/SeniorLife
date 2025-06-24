@@ -7,7 +7,7 @@ const express = require('express');
 // Assuming the controller file is located at '../../Controller/acompanhanteController.js'
 // relative to this routes file (Api/Routes/acompanhanteRoutes.js).
 // Adjust the path if your folder structure is different.
-const { cadastrar, login, consultar, editar, excluir } = require('../../Controller/acompanhanteController.js');
+const { cadastrar, login } = require('../../Controller/acompanhanteController.js');
 
 // Create a new router object to define a modular set of routes.
 const router = express.Router();
@@ -27,15 +27,6 @@ router.post('/Cadastro', cadastrar);
  * @body    { "email": "string", "senha": "string" }
  */
 router.post('/Login', login);
-
-// Listar todos os acompanhantes (GET)
-router.get('/', consultar);
-
-// Editar acompanhante (PUT)
-router.put('/:id', editar);
-
-// Excluir acompanhante (DELETE)
-router.delete('/:id', excluir);
 
 // Export the router to be mounted by the main application.
 module.exports = router;

@@ -13,8 +13,8 @@ class TelaRecuperarSenha extends StatelessWidget {
             Navigator.pop(context);
           },
           style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(const Color(0xFF7AC77E)),
-            shape: WidgetStateProperty.all(const CircleBorder()),
+            backgroundColor: WidgetStateProperty.all(Color(0xFF7AC77E)),
+            shape: WidgetStateProperty.all(CircleBorder()),
           ),
         ),
         backgroundColor: Colors.transparent,
