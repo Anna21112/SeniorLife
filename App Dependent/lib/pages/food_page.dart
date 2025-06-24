@@ -39,7 +39,6 @@ class FoodPage extends StatefulWidget {
 
 class _FoodPageState extends State<FoodPage> {
   String? _userId;
-  String? _userToken;
   List<FoodItem> foodItems = [];
   bool isLoading = true;
   String? error;
@@ -56,7 +55,6 @@ class _FoodPageState extends State<FoodPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userId = prefs.getString('userId');
-      _userToken = prefs.getString('userToken');
     });
 
     if (_userId == null) {
@@ -101,21 +99,9 @@ class _FoodPageState extends State<FoodPage> {
       //   ... outros itens
       // ]
       // ---------------------------------------------------
-      final url = Uri.parse('https://3568-2804-61ac-110b-8200-3c09-c58d-5b94-bf7a.ngrok-free.app/api/rotinas/$_userId/activity?type=alimentacao');
+      final url = Uri.parse('https://sua-api.com.br/fooditems?userId=$_userId');
 
-      print("URL da API: $url");
-
-      print("Token do usuário: $_userToken");
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $_userToken',
-          'ngrok-skip-browser-warning': 'true',
-        },
-      );
-
-      print('Resposta da API: ${response.statusCode} - ${response.body}');
+      final response = await http.get(url);
 
       if (response.statusCode == 200) {
         List<dynamic> jsonList = json.decode(response.body);

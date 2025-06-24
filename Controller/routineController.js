@@ -53,7 +53,6 @@ const createActivity = catchAsync(async (req, res, next) => {
  * @param {function} next - The Express next middleware function.
  */
 const getActivities = catchAsync(async (req, res, next) => {
-  console.log('REQ:', req.params, req.query);
   const { id_idoso } = req.params;
   const { type } = req.query; // <-- pega o filtro do query param
 
@@ -65,10 +64,7 @@ const getActivities = catchAsync(async (req, res, next) => {
 
   // Se o filtro 'type' foi enviado, filtra as atividades
   if (type) {
-    // Normaliza o tipo vindo da URL (minúsculas, sem espaços extras)
-    const filterType = type.trim().toLowerCase();
-    // Compara ambos os valores em minúsculas para garantir a correspondência
-    activity = activity.filter(act => act.type && act.type.toLowerCase() === filterType);
+    activity = activity.filter(act => act.type === type);
   }
 
   res.status(200).json({
@@ -89,7 +85,6 @@ const getActivities = catchAsync(async (req, res, next) => {
  * @param {function} next - The Express next middleware function.
  */
 const getActivityById = catchAsync(async (req, res, next) => {
-  console.log('REQ:', req.params, req.query);
   const { id_idoso, activityId } = req.params;
   if (!id_idoso || !activityId) {
     return next(new AppError("Dependent ID (id_idoso) and Activity ID (activityId) are required in URL parameters.", 400));

@@ -191,25 +191,25 @@ class CustomBottomNavBar extends StatefulWidget {
                           ],
                         ),
                       );
-                    }),
+                    }).toList(),
                     const PopupMenuDivider(),
-                    const PopupMenuItem<String>(
+                    PopupMenuItem<String>(
                       value: 'adicionar',
                       child: Row(
                         children: [
-                          Text('Adicionar dependente'),
-                          Spacer(),
-                          Icon(Icons.add_circle, color: Colors.green),
+                          const Text('Adicionar dependente'),
+                          const Spacer(),
+                          const Icon(Icons.add_circle, color: Colors.green),
                         ],
                       ),
                     ),
-                    const PopupMenuItem<String>(
+                    PopupMenuItem<String>(
                       value: 'editar',
                       child: Row(
                         children: [
-                          Text('Editar Dependentes'),
-                          Spacer(),
-                          Icon(Icons.edit, color: Color(0xFF31A2C6)),
+                          const Text('Editar Dependentes'),
+                          const Spacer(),
+                          const Icon(Icons.edit, color: Color(0xFF31A2C6)),
                         ],
                       ),
                     ),

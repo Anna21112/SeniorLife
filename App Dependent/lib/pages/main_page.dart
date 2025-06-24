@@ -19,7 +19,6 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final Color backgroundColor = const Color(0xFFF5F6FF);
   String? _userId; // Variável para armazenar o ID do usuário
-  String? _userToken; // Variável para armazenar o token do usuário 
 
   @override
   void initState() {
@@ -56,9 +55,7 @@ class _MainPageState extends State<MainPage> {
     // Lê o 'userId' que foi salvo no dispositivo durante o login.
     setState(() {
       _userId = prefs.getString('userId');
-      _userToken = prefs.getString('userToken'); 
       print('User ID carregado: $_userId');
-      print('User Token carregado: $_userToken');
     });
   }
 
