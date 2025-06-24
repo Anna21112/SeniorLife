@@ -43,8 +43,8 @@ router.post(
  */
 router.get(
   '/rotinas/:id_idoso/activity',
-  autenticarAcompanhante,
-  checkCaregiverPermission,
+  //autenticarAcompanhante,
+  //checkCaregiverPermission,
   validateParams,             // Validate URL parameters
   routineController.getActivities
 );
@@ -69,8 +69,8 @@ router.delete(
  */
 router.get(
   '/rotinas/:id_idoso/activity/:activityId',
-  autenticarAcompanhante,
-  checkCaregiverPermission,
+  //autenticarAcompanhante,
+  //checkCaregiverPermission,
   validateParams,             // Validate URL parameters (id_idoso and activityId)
   routineController.getActivityById
 );
