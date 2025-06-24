@@ -8,7 +8,7 @@ const express = require('express');
 // Assuming the controller file is located at '../../Controller/dependenteController.js'
 // relative to this routes file (Api/Routes/dependenteRoutes.js).
 // Adjust the path if your folder structure is different.
-const { cadastrar, login } = require('../../Controller/dependenteController.js');
+const { cadastrar, login, consultar, editar, excluir } = require('../../Controller/dependenteController.js');
 
 // Assuming the middleware file is located at '../../Middleware/authAcompanhante.js'.
 // Adjust the path if your folder structure is different.
@@ -36,13 +36,13 @@ router.post('/Cadastro', autenticarAcompanhante, cadastrar);
 router.post('/Login', login);
 
 // Listar todos os dependentes (GET)
-router.get('/', consultar);
+router.get('/',  autenticarAcompanhante, consultar);
 
 // Editar dependente (PUT)
-router.put('/:id', editar);
+router.put('/:id', autenticarAcompanhante, editar);
 
 // Excluir dependente (DELETE)
-router.delete('/:id', excluir);
+router.delete('/:id', autenticarAcompanhante, excluir);
 
 // Export the router to be mounted by the main application.
 module.exports = router;

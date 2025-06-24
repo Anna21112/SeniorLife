@@ -40,87 +40,67 @@ class _TelaCadastroState extends State<TelaCadastro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(const Color(0xFF7AC77E)),
-            shape: WidgetStateProperty.all(const CircleBorder()),
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(''),
-        titleTextStyle: const TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          color: Colors.blue,
-        ),
-        centerTitle: true,
-      ),
-      extendBodyBehindAppBar: true,
+      // ...existing code...
       body: Stack(
         children: [
-          Container(
-            constraints: const BoxConstraints.expand(),
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/imagens/backgroundSenior.png'),
-                fit: BoxFit.cover,
+          // ...existing code...
+          Center(
+            child: Container(
+              margin: const EdgeInsets.all(30),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+              width: 350,
+              height: 700,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6F6FF),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 5),
+                    const Text(
+                      'Cadastro',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    _CampoTexto(label: 'Nome', controller: nomeController),
+                    const SizedBox(height: 15),
+                    _CampoTexto(label: 'Sobrenome', controller: sobrenomeController),
+                    const SizedBox(height: 15),
+                    _CampoData(label: 'Data de Nascimento', controller: dataController),
+                    const SizedBox(height: 15),
+                    _CampoTexto(label: 'Telefone', controller: telefoneController),
+                    const SizedBox(height: 15),
+                    _CampoTexto(label: 'E-mail', controller: emailController),
+                    const SizedBox(height: 25),
+                    _CampoTexto(label: 'Senha', isSenha: true, controller: senhaController),
+                    const SizedBox(height: 25),
+                    ElevatedButton(
+                      onPressed: _enviarCadastro,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7AC77E),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      ),
+                      child: const Text(
+                        'Continuar',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          Center(child: _retanguloCadastro()),
         ],
-      ),
-    );
-  }
-
-  Widget _retanguloCadastro() {
-    return Container(
-      margin: const EdgeInsets.all(30),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-      width: 350,
-      height: 700,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6F6FF),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: const SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 5),
-            Text(
-              'Cadastro',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            _CampoTexto(label: 'Nome'),
-            SizedBox(height: 15),
-            _CampoTexto(label: 'Sobrenome'),
-            SizedBox(height: 15),
-            _CampoData(label: 'Data de Nascimento'),
-            SizedBox(height: 15),
-            _CampoTexto(label: 'Telefone'),
-            SizedBox(height: 15),
-            _CampoTexto(label: 'E-mail'),
-            SizedBox(height: 25),
-            _CampoTexto(label: 'Senha', isSenha: true), // <-- Aqui!
-            SizedBox(height: 25),
-            _BotaoContinuar(),
-          ],
-        ),
       ),
     );
   }

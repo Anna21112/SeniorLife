@@ -41,7 +41,11 @@ const knexInstance = postgresConnection.getConnection();
 // --- EXPRESS SERVER AND SOCKET.IO CONFIGURATION ---
 const app = express();
 const server = http.createServer(app); // Create HTTP server from Express app
-
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
+})); // CORS for Express routes
 // Initialize Socket.IO
 const ioModule = require('./io'); 
 const io = new Server(server, {
@@ -57,7 +61,7 @@ initializeSocketManager(io);
 
 // Applying middleware to Express app
 app.use(morgan('dev'));
-app.use(cors()); // CORS for Express routes
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
