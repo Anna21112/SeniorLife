@@ -40,6 +40,8 @@ class PhysicalActivityPage extends StatefulWidget {
 class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
   // ADICIONADO: Variável para armazenar o ID do usuário
   String? _userId;
+  // ADICIONADO: Variável para armazenar o token do usuário
+  String? _userToken;
 
   List<ActivityItem> activityItems = [];
   bool isLoading = true;
@@ -59,6 +61,7 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userId = prefs.getString('userId');
+      _userToken = prefs.getString('userToken');
     });
 
     if (_userId == null) {
@@ -69,6 +72,7 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
       });
       return;
     }
+
     // Após carregar o ID, busca os itens
     _fetchActivityItems();
   }
@@ -83,31 +87,24 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
     });
 
     try {
-      // --- CONTRATO DE DADOS: BUSCAR ATIVIDADES (GET) ---
-      // 1. ENDPOINT: A URL para buscar as atividades do usuário.
-      //    A API deve filtrar os resultados pelo 'userId' enviado como
-      //    um "query parameter" (ex: /activities?userId=...).
-      //    [!] SUBSTITUA A URL ABAIXO PELA SUA URL REAL.
-      //
-      // 2. RESPOSTA (JSON): Se a busca for bem-sucedida (statusCode 200),
-      //    a API deve retornar uma LISTA de objetos com o seguinte formato:
-      //
-      // [
-      //   {
-      //     "id": "string_unica_do_item",
-      //     "time": "09:00",
-      //     "name": "Nome da Atividade",
-      //     "description": "Descrição detalhada da atividade.",
-      //     "checked": false
-      //   },
-      //   ... outros itens
-      // ]
-      // ---------------------------------------------------
+      print('Buscando atividades para o usuário: $_userId');
       final url = Uri.parse(
-        'https://sua-api.com.br/activities?userId=$_userId',
+        'https://3568-2804-61ac-110b-8200-3c09-c58d-5b94-bf7a.ngrok-free.app/api/rotinas/$_userId/activity?type=atividade fisica',
       );
 
-      final response = await http.get(url);
+      print("URL da API: $url");
+
+      print("Token do usuário: $_userToken");
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $_userToken',
+          'ngrok-skip-browser-warning': 'true',
+        },
+      );
+
+      print('Resposta da API: ${response.statusCode} - ${response.body}');
 
       if (response.statusCode == 200) {
         List<dynamic> jsonList = json.decode(response.body);
