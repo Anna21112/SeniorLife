@@ -51,6 +51,8 @@ class TelaExibirPerfilDepen extends StatefulWidget {
 }
 
 class _TelaExibirPerfilDepenState extends State<TelaExibirPerfilDepen> {
+
+  
   // Futuro para armazenar os dados do usuário que virão da API.
   late Future<User> _userFuture;
 

@@ -65,6 +65,14 @@ class _TelaLembretesState extends State<TelaLembretes> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final dependentePadraoId = prefs.getString('dependente_padrao_id');
+    
+    if (dependentePadraoId == null || dependentePadraoId.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Selecione um dependente antes de criar lembretes!')),
+    );
+    return;
+  }
+
 
     final body = jsonEncode({
       'title': lembrete.titulo,
@@ -94,7 +102,13 @@ class _TelaLembretesState extends State<TelaLembretes> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final dependentePadraoId = prefs.getString('dependente_padrao_id');
-
+    
+    if (dependentePadraoId == null || dependentePadraoId.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Selecione um dependente antes de criar lembretes!')),
+    );
+    return;
+  }
     final response = await http.delete(
       Uri.parse('$apiUrl/api/rotinas/$dependentePadraoId/activity/$id'),
       headers: {
@@ -112,7 +126,14 @@ class _TelaLembretesState extends State<TelaLembretes> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final dependentePadraoId = prefs.getString('dependente_padrao_id');
-
+    
+    if (dependentePadraoId == null || dependentePadraoId.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Selecione um dependente antes de criar lembretes!')),
+    );
+    return;
+  }
+  
     final response = await http.put(
       Uri.parse(
           '$apiUrl/api/rotinas/$dependentePadraoId/activity/${lembrete.id}'),
