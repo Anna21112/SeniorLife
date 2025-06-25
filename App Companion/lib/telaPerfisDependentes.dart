@@ -27,7 +27,14 @@ class ProfileApiService {
     if (token == null || token.isEmpty) {
       throw Exception('Token não encontrado. Faça login novamente.');
     }
-
+  }
+  static Future<void> deleteProfile(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Token não encontrado. Faça login novamente.');
+    }
+    
     final response = await http.get(
       Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents'),
       headers: {
