@@ -29,13 +29,14 @@ class ProfileApiService {
       throw Exception('Token não encontrado. Faça login novamente.');
     }
   }
+
   static Future<void> deleteProfile(String id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     if (token == null || token.isEmpty) {
       throw Exception('Token não encontrado. Faça login novamente.');
     }
-    
+
     final response = await http.get(
       Uri.parse('$apiUrl/api/dependents'),
       headers: {

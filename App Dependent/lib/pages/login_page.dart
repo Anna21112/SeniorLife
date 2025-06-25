@@ -38,9 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final url = Uri.parse(
-        '$apiUrl/api/dependents/Login',
-      );
+      final url = Uri.parse('$apiUrl/api/dependents/Login');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
@@ -65,7 +63,9 @@ class _LoginPageState extends State<LoginPage> {
         final userTokenFromApi = responseData['token'];
 
         if (userTokenFromApi == null) {
-          _showErrorSnackbar('Resposta inválida do servidor (userToken ausente).');
+          _showErrorSnackbar(
+            'Resposta inválida do servidor (userToken ausente).',
+          );
           return;
         }
 

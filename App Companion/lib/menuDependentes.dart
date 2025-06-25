@@ -110,59 +110,67 @@ class TelaAdicionarDependente extends StatelessWidget {
                         icon: const Icon(Icons.edit, color: Colors.orange),
                         tooltip: 'Editar',
                         onPressed: () {
-                               Navigator.push(
-                                 context,
-                                 MaterialPageRoute(
-                                   builder: (_) =>
-                                       TelaExibirPerfilDepen(dependente: dependente),
-                                 ),
-                               );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  TelaExibirPerfilDepen(dependente: dependente),
+                            ),
+                          );
                         },
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         tooltip: 'Excluir',
                         onPressed: () async {
-                           final confirm = await showDialog<bool>(
-                             context: context,
-                             builder: (context) => AlertDialog(
-                             title: const Text('Excluir dependente'),
-                             content: Text('Tem certeza que deseja excluir ${dependente.nome}?'),
-                             actions: [
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Excluir dependente'),
+                              content: Text(
+                                  'Tem certeza que deseja excluir ${dependente.nome}?'),
+                              actions: [
                                 TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text('Cancelar'),
-                              ),
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancelar'),
+                                ),
                                 TextButton(
                                   onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Excluir', style: TextStyle(color: Colors.red)),
-                              ),
-                      ],
-                  ),
-              );
-                            if (confirm == true) {
-                              final prefs = await SharedPreferences.getInstance();
-                              final token = prefs.getString('token');
-                              final response = await http.delete(
-                                Uri.parse('$apiUrl/api/dependents/${dependente.id}'),
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': 'Bearer $token',
-                                  'ngrok-skip-browser-warning': 'true',
-                                },
+                                  child: const Text('Excluir',
+                                      style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            final prefs = await SharedPreferences.getInstance();
+                            final token = prefs.getString('token');
+                            final response = await http.delete(
+                              Uri.parse(
+                                  '$apiUrl/api/dependents/${dependente.id}'),
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer $token',
+                                'ngrok-skip-browser-warning': 'true',
+                              },
                             );
                             if (response.statusCode == 200) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${dependente.nome} excluído com sucesso!')),
-      );
-      // Atualiza a lista após exclusão
+                                SnackBar(
+                                    content: Text(
+                                        '${dependente.nome} excluído com sucesso!')),
+                              );
+                              // Atualiza a lista após exclusão
                               (context as Element).reassemble();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Erro ao excluir dependente')),
-      );
-    }
-  }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Erro ao excluir dependente')),
+                              );
+                            }
+                          }
                         },
                       ),
                     ],
@@ -170,7 +178,8 @@ class TelaAdicionarDependente extends StatelessWidget {
                   onTap: () async {
                     // Salva o dependente selecionado como padrão
                     final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('dependente_padrao_id', dependente.id);
+                    await prefs.setString(
+                        'dependente_padrao_id', dependente.id);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                           content:
