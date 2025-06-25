@@ -70,61 +70,62 @@ class _TelaExibirPerfilDepenState extends State<TelaExibirPerfilDepen> {
     _userFuture = _fetchUserData();
   }
 
- Future<User> _fetchUserData() async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  final dependenteId = widget.dependente.id;
+  Future<User> _fetchUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final dependenteId = widget.dependente.id;
 
-  final response = await http.get(
-    Uri.parse('$apiUrl/api/emergency/$dependenteId'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-      'ngrok-skip-browser-warning': 'true',
-    },
-  );
-
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    final emergency = data['data'];
-    // Ajuste os campos conforme o retorno da sua API!
-    return User(
-      name: emergency['nome'] ?? '',
-      age: emergency['idade'] ?? 0,
-      address: emergency['alergias'] ?? '',
-      phones: emergency['contato_emergencia'] != null
-    ? [emergency['contato_emergencia'].toString()]
-    : [],
+    final response = await http.get(
+      Uri.parse('$apiUrl/api/emergency/$dependenteId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+        'ngrok-skip-browser-warning': 'true',
+      },
     );
-  } else {
-    throw Exception('Erro ao buscar dados do dependente');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final emergency = data['data'];
+      // Ajuste os campos conforme o retorno da sua API!
+      return User(
+        name: emergency['nome'] ?? '',
+        age: emergency['idade'] ?? 0,
+        address: emergency['alergias'] ?? '',
+        phones: emergency['contato_emergencia'] != null
+            ? [emergency['contato_emergencia'].toString()]
+            : [],
+      );
+    } else {
+      throw Exception('Erro ao buscar dados do dependente');
+    }
   }
-}
 
   Future<void> _updateUserData(User user) async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  final dependenteId = widget.dependente.id;
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final dependenteId = widget.dependente.id;
 
-  final response = await http.put(
-    Uri.parse('$apiUrl/api/emergency/$dependenteId'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-      'ngrok-skip-browser-warning': 'true',
-    },
-    body: jsonEncode({
-      'nome': user.name,
-      'idade': user.age,
-      'alergias': user.address,
-      'contato_emergencia': user.phones.isNotEmpty ? user.phones.first : '',
-    }),
-  );
+    final response = await http.put(
+      Uri.parse('$apiUrl/api/emergency/$dependenteId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+        'ngrok-skip-browser-warning': 'true',
+      },
+      body: jsonEncode({
+        'nome': user.name,
+        'idade': user.age,
+        'alergias': user.address,
+        'contato_emergencia': user.phones.isNotEmpty ? user.phones.first : '',
+      }),
+    );
 
-  if (response.statusCode != 200 && response.statusCode != 201) {
-    throw Exception('Erro ao atualizar dados do dependente');
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Erro ao atualizar dados do dependente');
+    }
   }
-}
+
   void _toggleEditMode(User currentUser) {
     setState(() {
       if (_isEditing) {

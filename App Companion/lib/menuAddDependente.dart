@@ -22,7 +22,6 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
   final _emergenciaController = TextEditingController();
   final _alergiaController = TextEditingController();
 
-
   bool _salvando = false;
 
   @override
@@ -39,50 +38,55 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
   }
 
   Future<void> salvarDependente() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    // 1. Salva na tabela dependente
+    final urlDependente = Uri.parse('$apiUrl/api/dependents/Cadastro');
+    final responseDependente = await http.post(
+      urlDependente,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+      body: jsonEncode({
+        'nome': _nomeController.text,
+        'email': _emailController.text,
+        'senha': _senhaController.text,
+      }),
+    );
+    if (responseDependente.statusCode != 200 &&
+        responseDependente.statusCode != 201) {
+      throw Exception('Erro ao salvar dependente');
+    }
 
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  // 1. Salva na tabela dependente
-  final urlDependente = Uri.parse('$apiUrl/api/dependents/Cadastro');
-  final responseDependente = await http.post(
-    urlDependente,
-    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
-    body: jsonEncode({
-      'nome': _nomeController.text,
-      'email': _emailController.text,
-      'senha': _senhaController.text,
-    }),
-  );
-  if (responseDependente.statusCode != 200 && responseDependente.statusCode != 201) {
-    throw Exception('Erro ao salvar dependente');
+    final dependenteData = jsonDecode(responseDependente.body);
+    final dependenteId =
+        dependenteData['data']?['dependente']?['id'] ?? dependenteData['id'];
+
+    print('ID do dependente salvo: $dependenteId');
+
+    // 2. Salva as informações adicionais (pegue o id do dependente salvo, se necessário)
+    final urlInfo = Uri.parse('$apiUrl/api/emergency/');
+    final responseInfo = await http.post(
+      urlInfo,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+      body: jsonEncode({
+        'dependente_id': dependenteId,
+        'nome': _nomeController.text,
+        'idade': _idadeController.text,
+        'alergias': _alergiaController.text,
+        'historico': _restricoesController.text,
+        'contato_emergencia': _emergenciaController.text,
+      }),
+    );
+    if (responseInfo.statusCode != 200 && responseInfo.statusCode != 201) {
+      throw Exception('Erro ao salvar informações do dependente');
+    }
   }
 
-  final dependenteData = jsonDecode(responseDependente.body);
-  final dependenteId = dependenteData['data']?['dependente']?['id'] ?? dependenteData['id'];
-
-  print('ID do dependente salvo: $dependenteId');
-
-  // 2. Salva as informações adicionais (pegue o id do dependente salvo, se necessário)
-  final urlInfo = Uri.parse('$apiUrl/api/emergency/');
-  final responseInfo = await http.post(
-    urlInfo,
-    headers: {'Content-Type': 'application/json','Authorization': 'Bearer $token'},
-    body: jsonEncode({
-      'dependente_id': dependenteId,
-      'nome': _nomeController.text,
-      'idade': _idadeController.text,
-      'alergias': _alergiaController.text,
-      'historico': _restricoesController.text,
-      'contato_emergencia': _emergenciaController.text,
-    }),
-  );
-  if (responseInfo.statusCode != 200 && responseInfo.statusCode != 201) {
-    throw Exception('Erro ao salvar informações do dependente');
-  }
-}
-
-    
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,7 +108,9 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
             const SizedBox(height: 10),
             _campoTexto(label: 'Email:', controller: _emailController),
             const SizedBox(height: 10),
-            _campoTexto(label: 'Contato de emergencia:', controller: _emergenciaController),
+            _campoTexto(
+                label: 'Contato de emergencia:',
+                controller: _emergenciaController),
             const SizedBox(height: 10),
             _campoTexto(label: 'Alergias:', controller: _alergiaController),
             const SizedBox(height: 20),

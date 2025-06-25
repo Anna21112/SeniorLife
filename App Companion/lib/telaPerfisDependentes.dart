@@ -52,27 +52,28 @@ class ProfileApiService {
       throw Exception('Erro ao buscar dependentes');
     }
   }
+
   static Future<void> deleteProfile(String id) async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  if (token == null || token.isEmpty) {
-    throw Exception('Token não encontrado. Faça login novamente.');
-  }
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null || token.isEmpty) {
+      throw Exception('Token não encontrado. Faça login novamente.');
+    }
 
-  final response = await http.delete(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/$id'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-  );
+    final response = await http.delete(
+      Uri.parse(
+          'https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-  if (response.statusCode != 200) {
-    throw Exception('Erro ao excluir dependente');
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao excluir dependente');
+    }
   }
 }
-}
-
 
 // --- Ponto de Entrada da Aplicação ---
 void main() {

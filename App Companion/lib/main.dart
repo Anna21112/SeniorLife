@@ -259,24 +259,6 @@ class _TelaLoginState extends State<TelaLogin> {
             const SizedBox(height: 10),
 
             // Botão de teste para pular o login
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const TelaAdicionarDependente(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Entrar (Teste - pular login)',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
           ],
         ),
       ),

@@ -88,9 +88,9 @@ class CustomBottomNavBar extends StatefulWidget {
 
   @override
   State<CustomBottomNavBar> createState() => _CustomBottomNavBarState();
-  }
+}
 
-  class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
+class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   List<Dependente> listaDeDependentes = [];
   bool carregando = true;
 
@@ -105,7 +105,7 @@ class CustomBottomNavBar extends StatefulWidget {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null || token.isEmpty) {
-      return;
+        return;
       }
       final response = await http.get(
         Uri.parse('$apiUrl/api/dependents/'),
@@ -120,22 +120,20 @@ class CustomBottomNavBar extends StatefulWidget {
         final data = jsonDecode(response.body);
         final dependentes = data['data']['dependentes'] as List;
         setState(() {
-          listaDeDependentes = dependentes.map((json) => Dependente.fromJson(json)).toList();
+          listaDeDependentes =
+              dependentes.map((json) => Dependente.fromJson(json)).toList();
           carregando = false;
         });
       } else {
         setState(() => carregando = false);
       }
     } catch (e) {
-      
       setState(() => carregando = false);
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return SafeArea(
       child: Container(
         height: 80,
@@ -159,17 +157,15 @@ class CustomBottomNavBar extends StatefulWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TelaExibirPerfilDepen(dependente: value),
+                        builder: (_) =>
+                            TelaExibirPerfilDepen(dependente: value),
                       ),
                     );
                     // Ação ao clicar em um dependente da lista
-                    
-                  } else if (value == 'adicionar'){
+                  } else if (value == 'adicionar') {
                     // Ação ao clicar em "Adicionar dependente"
-                   
                   } else if (value == 'editar') {
                     // Ação ao clicar em "Editar Dependentes"
-                    
                   }
                 },
                 itemBuilder: (BuildContext context) {
@@ -287,7 +283,10 @@ class CustomBottomNavBar extends StatefulWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                           builder: (_) => TelaExibirPerfilDepen(dependente: listaDeDependentes.isNotEmpty ? listaDeDependentes.first : Dependente(id: '', nome: '')),
+                            builder: (_) => TelaExibirPerfilDepen(
+                                dependente: listaDeDependentes.isNotEmpty
+                                    ? listaDeDependentes.first
+                                    : Dependente(id: '', nome: '')),
                           ),
                         );
                       },

@@ -59,7 +59,7 @@ class _TelaPerfilAcompanhanteState extends State<TelaPerfilAcompanhante> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       print('Perfil acompanhante: $data');
-      
+
       usuario = Usuario(
         nome: data['nome'] ?? '',
         email: data['email'] ?? '',
@@ -93,82 +93,82 @@ class _TelaPerfilAcompanhanteState extends State<TelaPerfilAcompanhante> {
   }
 
   void _editarPerfil() async {
-  final nomeController = TextEditingController(text: usuario.nome);
-  final emailController = TextEditingController(text: usuario.email);
+    final nomeController = TextEditingController(text: usuario.nome);
+    final emailController = TextEditingController(text: usuario.email);
 
-  final resultado = await showDialog<Map<String, String>>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Editar Perfil'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: nomeController,
-            decoration: const InputDecoration(labelText: 'Nome'),
-            autofocus: true,
+    final resultado = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Perfil'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nomeController,
+              decoration: const InputDecoration(labelText: 'Nome'),
+              autofocus: true,
+            ),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'E-mail'),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
-          TextField(
-            controller: emailController,
-            decoration: const InputDecoration(labelText: 'E-mail'),
-            keyboardType: TextInputType.emailAddress,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, {
+                'nome': nomeController.text.trim(),
+                'email': emailController.text.trim(),
+              });
+            },
+            child: const Text('Salvar'),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context, {
-              'nome': nomeController.text.trim(),
-              'email': emailController.text.trim(),
-            });
-          },
-          child: const Text('Salvar'),
-        ),
-      ],
-    ),
-  );
+    );
 
-  if (resultado != null) {
-    setState(() {
-      usuario.nome = resultado['nome'] ?? usuario.nome;
-      usuario.email = resultado['email'] ?? usuario.email;
-      avatarColor = _randomColor(usuario.nome);
-    });
-    // Aqui você pode fazer uma requisição para atualizar no backend, se quiser.
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    final acompanhante_id = prefs.getString('acompanhante_id');
-  await http.put(
-    Uri.parse('$apiUrl/api/caregivers/$acompanhante_id'), 
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-      'ngrok-skip-browser-warning': 'true',
-    },
-    body: jsonEncode({
-      'nome': usuario.nome,
-      'email': usuario.email,
-    }),
-  );
+    if (resultado != null) {
+      setState(() {
+        usuario.nome = resultado['nome'] ?? usuario.nome;
+        usuario.email = resultado['email'] ?? usuario.email;
+        avatarColor = _randomColor(usuario.nome);
+      });
+      // Aqui você pode fazer uma requisição para atualizar no backend, se quiser.
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      final acompanhante_id = prefs.getString('acompanhante_id');
+      await http.put(
+        Uri.parse('$apiUrl/api/caregivers/$acompanhante_id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: jsonEncode({
+          'nome': usuario.nome,
+          'email': usuario.email,
+        }),
+      );
+    }
   }
-}
 
-void _logout() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('token');
-  await prefs.remove('acompanhante_id');
-  // Se houver outros dados de sessão, remova aqui também
+  void _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('acompanhante_id');
+    // Se houver outros dados de sessão, remova aqui também
 
-  Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(builder: (_) => const TelaLogin()),
-    (Route<dynamic> route) => false,
-  );
-}
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const TelaLogin()),
+      (Route<dynamic> route) => false,
+    );
+  }
 
   Widget _infoLinha(String label, String valor) {
     return Padding(

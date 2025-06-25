@@ -32,7 +32,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
     );
     // Trate a resposta conforme necessário
     if (response.statusCode == 200) {
-      Navigator.pop(context); 
+      Navigator.pop(context);
     } else {
       // Erro
     }
@@ -69,27 +69,37 @@ class _TelaCadastroState extends State<TelaCadastro> {
                     const SizedBox(height: 5),
                     const Text(
                       'Cadastro',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     _CampoTexto(label: 'Nome', controller: nomeController),
                     const SizedBox(height: 15),
-                    _CampoTexto(label: 'Sobrenome', controller: sobrenomeController),
+                    _CampoTexto(
+                        label: 'Sobrenome', controller: sobrenomeController),
                     const SizedBox(height: 15),
-                    _CampoData(label: 'Data de Nascimento', controller: dataController),
+                    _CampoData(
+                        label: 'Data de Nascimento',
+                        controller: dataController),
                     const SizedBox(height: 15),
-                    _CampoTexto(label: 'Telefone', controller: telefoneController),
+                    _CampoTexto(
+                        label: 'Telefone', controller: telefoneController),
                     const SizedBox(height: 15),
                     _CampoTexto(label: 'E-mail', controller: emailController),
                     const SizedBox(height: 25),
-                    _CampoTexto(label: 'Senha', isSenha: true, controller: senhaController),
+                    _CampoTexto(
+                        label: 'Senha',
+                        isSenha: true,
+                        controller: senhaController),
                     const SizedBox(height: 25),
                     ElevatedButton(
                       onPressed: _enviarCadastro,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7AC77E),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 12),
                       ),
                       child: const Text(
                         'Continuar',
@@ -111,7 +121,8 @@ class _CampoTexto extends StatelessWidget {
   final String label;
   final bool isSenha;
   final TextEditingController controller;
-  const _CampoTexto({required this.label, this.isSenha = false, required this.controller});
+  const _CampoTexto(
+      {required this.label, this.isSenha = false, required this.controller});
 
   @override
   Widget build(BuildContext context) {
