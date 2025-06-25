@@ -4,6 +4,7 @@ import 'widgets/navigation_bars.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'global.dart';
 
 class TelaAdicionarDependente extends StatelessWidget {
   const TelaAdicionarDependente({super.key});
@@ -14,7 +15,7 @@ Future<List<Dependente>> buscarDependentes() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
   final response = await http.get(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/'),
+    Uri.parse('$apiUrl/api/dependents/'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart'; // ADICIONADO
+import 'global.dart';
 
 class MedicationItem {
   final String id;
@@ -106,7 +107,7 @@ class _MedicationPageState extends State<MedicationPage> {
       // ]
       // ---------------------------------------------------
       final url = Uri.parse(
-        'https://3568-2804-61ac-110b-8200-3c09-c58d-5b94-bf7a.ngrok-free.app/api/rotinas/$_userId/activity?type=medicacao',
+        '$apiUrl/api/rotinas/$_userId/activity?type=medicacao',
       );
 
       final response = await http.get(
@@ -118,7 +119,6 @@ class _MedicationPageState extends State<MedicationPage> {
         },
       );
 
-      print('Resposta da API: ${response.statusCode} - ${response.body}');
 
       if (response.statusCode == 200) {
         List<dynamic> jsonList = json.decode(response.body);

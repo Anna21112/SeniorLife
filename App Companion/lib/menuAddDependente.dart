@@ -3,6 +3,7 @@ import 'widgets/navigation_bars.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'global.dart';
 
 class TelaCadastroDependente extends StatefulWidget {
   const TelaCadastroDependente({super.key});
@@ -42,7 +43,7 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
   // 1. Salva na tabela dependente
-  final urlDependente = Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/Cadastro');
+  final urlDependente = Uri.parse('$apiUrl/api/dependents/Cadastro');
   final responseDependente = await http.post(
     urlDependente,
     headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
@@ -62,7 +63,7 @@ class _TelaCadastroDependenteState extends State<TelaCadastroDependente> {
   print('ID do dependente salvo: $dependenteId');
 
   // 2. Salva as informações adicionais (pegue o id do dependente salvo, se necessário)
-  final urlInfo = Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/emergency/');
+  final urlInfo = Uri.parse('$apiUrl/api/emergency/');
   final responseInfo = await http.post(
     urlInfo,
     headers: {'Content-Type': 'application/json','Authorization': 'Bearer $token'},

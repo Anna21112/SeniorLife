@@ -4,6 +4,7 @@ import 'widgets/navigation_bars.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'global.dart';
 
 // Modelo para representar os dados do usuário que vêm da API.
 class User {
@@ -75,7 +76,7 @@ class _TelaExibirPerfilDepenState extends State<TelaExibirPerfilDepen> {
   final dependenteId = widget.dependente.id;
 
   final response = await http.get(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/emergency/$dependenteId'),
+    Uri.parse('$apiUrl/api/emergency/$dependenteId'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -106,7 +107,7 @@ class _TelaExibirPerfilDepenState extends State<TelaExibirPerfilDepen> {
   final dependenteId = widget.dependente.id;
 
   final response = await http.put(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/emergency/$dependenteId'),
+    Uri.parse('$apiUrl/api/emergency/$dependenteId'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

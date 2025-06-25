@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/navigation_bars.dart';
+import 'global.dart';
 
 // Modelo de dados para medicação
 class Medication {

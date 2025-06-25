@@ -12,6 +12,7 @@ const {
   editarAcompanhante,
   excluirAcompanhante,
   buscarAcompanhantePorEmail,
+  buscarAcompanhantePorId,
 } = require('../Model/acompanhanteModel.js'); // Adjust path if necessary
 const AppError = require('../Utils/appError.js');
 const catchAsync = require('../Utils/catchAsync.js');
@@ -131,11 +132,10 @@ exports.editar = catchAsync(async (req, res, next) => {
   const { id: caregiverIdToEdit } = req.params;
   const updateData = req.body;
   const authenticatedCaregiverId = req.acompanhante?.id; // From JWT (authAcompanhante middleware)
-
+  console.log(req.acompanhante.id, req.params.id);
   if (!authenticatedCaregiverId || authenticatedCaregiverId !== caregiverIdToEdit) {
     return next(new AppError('Forbidden: You can only update your own profile.', 403));
   }
-
   delete updateData.id;
   delete updateData.email; // Email changes usually require verification
 
@@ -191,3 +191,15 @@ exports.excluir = catchAsync(async (req, res, next) => {
     message: 'Caregiver profile deleted successfully!'
   });
 });
+
+exports.consultarUm = async (req, res) => {
+  try {
+    const acompanhante = await buscarAcompanhantePorId(req.params.id);
+    if (!acompanhante) {
+      return res.status(404).json({ message: 'Acompanhante não encontrado' });
+    }
+    res.json(acompanhante);
+  } catch (err) {
+    res.status(500).json({ message: 'Erro ao buscar acompanhante' });
+  }
+};

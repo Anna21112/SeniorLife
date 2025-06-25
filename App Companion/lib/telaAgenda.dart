@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Importe para formatação de data
 import 'package:table_calendar/table_calendar.dart';
 import 'widgets/navigation_bars.dart';
+import 'global.dart';
 
 class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});

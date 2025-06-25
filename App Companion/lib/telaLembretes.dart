@@ -5,6 +5,7 @@ import 'widgets/navigation_bars.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'global.dart';
 
 class Lembrete {
   String id;
@@ -39,7 +40,7 @@ Future<List<Lembrete>> buscarLembretesPorTipo(String tipo) async {
   final dependentePadraoId = prefs.getString('dependente_padrao_id');
 
   final response = await http.get(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity?type=$tipo'),
+    Uri.parse('$apiUrl/api/rotinas/$dependentePadraoId/activity?type=$tipo'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -76,7 +77,7 @@ Future<void> salvarLembreteNoBackend(Lembrete lembrete, String tipo) async {
   print('Enviando body: $body'); // <-- Adicione este print
 
   final response = await http.post(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity'),
+    Uri.parse('$apiUrl/api/rotinas/$dependentePadraoId/activity'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -98,7 +99,7 @@ Future<void> excluirLembreteNoBackend(String id, String tipo) async {
   final dependentePadraoId = prefs.getString('dependente_padrao_id');
 
   final response = await http.delete(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity/$id'),
+    Uri.parse('$apiUrl/api/rotinas/$dependentePadraoId/activity/$id'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -115,7 +116,7 @@ Future<void> editarLembreteNoBackend(Lembrete lembrete, String tipo) async {
   final dependentePadraoId = prefs.getString('dependente_padrao_id');
 
   final response = await http.put(
-    Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/rotinas/$dependentePadraoId/activity/${lembrete.id}'),
+    Uri.parse('$apiUrl/api/rotinas/$dependentePadraoId/activity/${lembrete.id}'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

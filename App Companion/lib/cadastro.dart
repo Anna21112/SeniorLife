@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'global.dart';
 
 class TelaCadastro extends StatefulWidget {
   const TelaCadastro({super.key});
@@ -19,7 +20,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
   final senhaController = TextEditingController();
 
   Future<void> _enviarCadastro() async {
-    final url = Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/caregivers/cadastro');
+    final url = Uri.parse('$apiUrl/api/caregivers/cadastro');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
