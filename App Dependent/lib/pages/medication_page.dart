@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // ADICIONADO
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'global.dart';
 
+// MODELO MEDICATIONITEM (ATUALIZADO)
 class MedicationItem {
   final String id;
   final String time;
@@ -20,13 +23,26 @@ class MedicationItem {
     this.checked = false,
   });
 
+  // Factory constructor atualizado para ler o novo formato JSON da API
   factory MedicationItem.fromJson(Map<String, dynamic> json) {
+    bool isChecked = json['status'] == 'concluido';
+
+    String formattedTime = "00:00";
+    if (json['schedule'] != null) {
+      try {
+        DateTime parsedDate = DateTime.parse(json['schedule']);
+        formattedTime = DateFormat('HH:mm').format(parsedDate);
+      } catch (e) {
+        print("Erro ao formatar data do JSON: $e");
+      }
+    }
+
     return MedicationItem(
-      id: json['id'] as String,
-      time: json['time'] as String,
-      medication: json['name'] as String,
+      id: json['_id'] as String,
+      time: formattedTime,
+      medication: json['title'] as String,
       info: json['description'] as String,
-      checked: json['checked'] as bool? ?? false,
+      checked: isChecked,
     );
   }
 }
@@ -39,10 +55,8 @@ class MedicationPage extends StatefulWidget {
 }
 
 class _MedicationPageState extends State<MedicationPage> {
-  // ADICIONADO: Variável para armazenar o ID do usuário
   String? _userId;
   String? _userToken;
-
   List<MedicationItem> medicationItems = [];
   bool isLoading = true;
   String? error;
@@ -52,32 +66,28 @@ class _MedicationPageState extends State<MedicationPage> {
   @override
   void initState() {
     super.initState();
-    // ADICIONADO: Carrega o ID do usuário antes de buscar os itens
-    _loadUserIdAndFetchItems();
+    _loadUserDataAndFetchRoutines();
   }
 
-  // ADICIONADO: Função para carregar o ID do usuário e depois buscar os itens
-  Future<void> _loadUserIdAndFetchItems() async {
+  Future<void> _loadUserDataAndFetchRoutines() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userId = prefs.getString('userId');
       _userToken = prefs.getString('userToken');
     });
 
-    if (_userId == null) {
+    if (_userId == null || _userToken == null) {
       setState(() {
-        error =
-            "Não foi possível identificar o usuário. Tente fazer login novamente.";
+        error = "Usuário não autenticado. Por favor, faça login novamente.";
         isLoading = false;
       });
       return;
     }
-    // Após carregar o ID, busca os itens de medicação
-    _fetchMedicationItems();
+    _fetchRoutines();
   }
 
-  /// Busca a lista de medicamentos do usuário logado na API.
-  Future<void> _fetchMedicationItems() async {
+  // Busca todas as rotinas e filtra por 'medicacao'
+  Future<void> _fetchRoutines() async {
     if (_userId == null) return;
 
     setState(() {
@@ -86,29 +96,7 @@ class _MedicationPageState extends State<MedicationPage> {
     });
 
     try {
-      // --- CONTRATO DE DADOS: BUSCAR ITENS (GET) ---
-      // 1. ENDPOINT: A URL para buscar os medicamentos do usuário.
-      //    A API deve filtrar os resultados pelo 'userId' enviado como
-      //    um "query parameter" (ex: /medications?userId=...).
-      //    [!] SUBSTITUA A URL ABAIXO PELA SUA URL REAL.
-      //
-      // 2. RESPOSTA (JSON): Se a busca for bem-sucedida (statusCode 200),
-      //    a API deve retornar uma LISTA de objetos com o seguinte formato:
-      //
-      // [
-      //   {
-      //     "id": "string_unica_do_item",
-      //     "time": "08:00",
-      //     "name": "Nome do Remédio",
-      //     "description": "Descrição e dosagem do remédio.",
-      //     "checked": false
-      //   },
-      //   ... outros itens
-      // ]
-      // ---------------------------------------------------
-      final url = Uri.parse(
-        '$apiUrl/api/rotinas/$_userId/activity?type=medicacao',
-      );
+      final url = Uri.parse('$apiUrl/api/rotinas/$_userId/activity');
 
       final response = await http.get(
         url,
@@ -119,13 +107,18 @@ class _MedicationPageState extends State<MedicationPage> {
         },
       );
 
-
       if (response.statusCode == 200) {
-        List<dynamic> jsonList = json.decode(response.body);
+        Map<String, dynamic> decodedResponse = json.decode(response.body);
+        List<dynamic> allActivities = decodedResponse['data']['activity'];
+
+        // Filtra a lista para pegar apenas os itens do tipo 'medicacao'
+        List<MedicationItem> filteredItems = allActivities
+            .where((item) => item['type'] == 'medicacao')
+            .map((json) => MedicationItem.fromJson(json))
+            .toList();
+
         setState(() {
-          medicationItems = jsonList
-              .map((json) => MedicationItem.fromJson(json))
-              .toList();
+          medicationItems = filteredItems;
           isLoading = false;
         });
       } else {
@@ -136,58 +129,45 @@ class _MedicationPageState extends State<MedicationPage> {
       }
     } catch (e) {
       setState(() {
-        error = 'Ocorreu um erro de conexão. Verifique sua internet.';
+        error = 'Ocorreu um erro de conexão: $e';
         isLoading = false;
       });
     }
   }
 
-  /// Envia a atualização do status de um item para a API.
-  Future<void> _updateMedicationItemStatus(String id, bool newStatus) async {
-    if (_userId == null) return;
+  // Envia a atualização de status para a API
+  Future<void> _updateMedicationItemStatus(
+    String activityId,
+    bool newCheckedStatus,
+  ) async {
+    if (_userToken == null) return;
+
+    String newApiStatus = newCheckedStatus ? 'concluido' : 'pendente';
 
     try {
-      // --- CONTRATO DE DADOS: ATUALIZAR ITEM (PUT ou PATCH) ---
-      // 1. ENDPOINT: A URL para atualizar um medicamento específico.
-      //    A API deve identificar o item pelo 'id' passado na URL
-      //    (ex: /medications/id_do_item).
-      //    [!] SUBSTITUA A URL ABAIXO PELA SUA URL REAL.
-      //
-      // 2. REQUISIÇÃO (JSON): O Flutter envia um JSON no corpo ('body')
-      //    com os dados a serem atualizados e o 'userId' para autorização.
-      //    Formato:
-      //
-      // {
-      //   "checked": true,  // ou false
-      //   "userId": "id_do_usuario_logado"
-      // }
-      //
-      // 3. RESPOSTA: A API deve confirmar o sucesso com um statusCode 200.
-      // ---------------------------------------------------
-      final url = Uri.parse('https://sua-api.com.br/medications/$id');
+      final url = Uri.parse('$apiUrl/api/rotinas/$activityId');
 
-      final response = await http.put(
+      final response = await http.patch(
         url,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{
-          'checked': newStatus,
-          'userId': _userId,
-        }),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $_userToken',
+        },
+        body: jsonEncode(<String, String>{'status': newApiStatus}),
       );
 
       if (response.statusCode == 200) {
-        print(
-          'Status do item $id (Medicação) atualizado com sucesso para $newStatus',
-        );
+        print('Status do item $activityId atualizado para $newApiStatus');
       } else {
-        throw Exception('Falha ao atualizar status na API');
+        throw Exception('Falha ao atualizar status na API: ${response.body}');
       }
     } catch (e) {
-      // Reverte a mudança na UI em caso de falha
       setState(() {
-        final itemIndex = medicationItems.indexWhere((item) => item.id == id);
+        final itemIndex = medicationItems.indexWhere(
+          (item) => item.id == activityId,
+        );
         if (itemIndex != -1) {
-          medicationItems[itemIndex].checked = !newStatus;
+          medicationItems[itemIndex].checked = !newCheckedStatus;
         }
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -195,7 +175,7 @@ class _MedicationPageState extends State<MedicationPage> {
           content: Text('Erro ao salvar alteração. Tente novamente.'),
         ),
       );
-      print('Erro ao atualizar status do item $id (Medicação): $e');
+      print('Erro ao atualizar status do item $activityId: $e');
     }
   }
 
@@ -227,7 +207,7 @@ class _MedicationPageState extends State<MedicationPage> {
               child: Text(
                 'Fechar',
                 style: _popupTextStyle.copyWith(color: Colors.blue),
-              ), // Cor ajustada
+              ),
             ),
           ],
         );
@@ -350,6 +330,7 @@ class _MedicationPageState extends State<MedicationPage> {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     if (error != null) {
       return Center(
         child: Padding(
@@ -364,7 +345,7 @@ class _MedicationPageState extends State<MedicationPage> {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: _fetchMedicationItems,
+                onPressed: _loadUserDataAndFetchRoutines,
                 child: const Text('Tentar Novamente'),
               ),
             ],
@@ -372,6 +353,7 @@ class _MedicationPageState extends State<MedicationPage> {
         ),
       );
     }
+
     if (medicationItems.isEmpty) {
       return const Center(
         child: Text(
@@ -380,6 +362,7 @@ class _MedicationPageState extends State<MedicationPage> {
         ),
       );
     }
+
     return ListView.separated(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 120),
       itemCount: medicationItems.length,

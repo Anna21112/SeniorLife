@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart'; // Importa o pacote para formatação de data
 import 'package:shared_preferences/shared_preferences.dart';
-import 'global.dart';
+
+import 'global.dart'; // Importa suas variáveis globais (como apiUrl)
 
 class FoodItem {
   final String id;
@@ -20,13 +22,30 @@ class FoodItem {
     this.checked = false,
   });
 
+  // Factory constructor atualizado para ler o novo formato JSON da API
   factory FoodItem.fromJson(Map<String, dynamic> json) {
+    // Converte o status (ex: "pendente", "concluido") para um booleano (true/false)
+    bool isChecked = json['status'] == 'concluido';
+
+    // Converte a data completa (ISO 8601) para apenas o horário (HH:mm)
+    String formattedTime = "00:00"; // Valor padrão em caso de erro
+    if (json['schedule'] != null) {
+      try {
+        DateTime parsedDate = DateTime.parse(json['schedule']);
+        formattedTime = DateFormat('HH:mm').format(parsedDate);
+      } catch (e) {
+        print("Erro ao formatar data do JSON: $e");
+      }
+    }
+
     return FoodItem(
-      id: json['id'] as String,
-      time: json['time'] as String,
-      food: json['name'] as String,
-      info: json['description'] as String,
-      checked: json['checked'] as bool? ?? false,
+      id: json['_id'] as String, // Mapeia '_id' da API para 'id'
+      time: formattedTime, // Usa o horário já formatado
+      food: json['title'] as String, // Mapeia 'title' da API para 'food'
+      info:
+          json['description']
+              as String, // Mapeia 'description' da API para 'info'
+      checked: isChecked, // Usa o status convertido para booleano
     );
   }
 }
@@ -50,29 +69,28 @@ class _FoodPageState extends State<FoodPage> {
   @override
   void initState() {
     super.initState();
-    _loadUserIdAndFetchItems();
+    _loadUserDataAndFetchRoutines();
   }
 
-  Future<void> _loadUserIdAndFetchItems() async {
+  Future<void> _loadUserDataAndFetchRoutines() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userId = prefs.getString('userId');
       _userToken = prefs.getString('userToken');
     });
 
-    if (_userId == null) {
+    if (_userId == null || _userToken == null) {
       setState(() {
-        error =
-            "Não foi possível identificar o usuário. Tente fazer login novamente.";
+        error = "Usuário não autenticado. Por favor, faça login novamente.";
         isLoading = false;
       });
       return;
     }
-    _fetchFoodItems();
+    _fetchRoutines();
   }
 
-  /// Busca a lista de alimentos do usuário logado na API.
-  Future<void> _fetchFoodItems() async {
+  // Busca todas as rotinas e filtra por 'alimentacao'
+  Future<void> _fetchRoutines() async {
     if (_userId == null) return;
 
     setState(() {
@@ -81,28 +99,7 @@ class _FoodPageState extends State<FoodPage> {
     });
 
     try {
-      // --- CONTRATO DE DADOS: BUSCAR ITENS (GET) ---
-      // 1. ENDPOINT: A URL para buscar os alimentos do usuário.
-      //    A API deve ser capaz de filtrar os resultados pelo 'userId'
-      //    enviado como um "query parameter" (ex: /fooditems?userId=...).
-      //    [!] SUBSTITUA A URL ABAIXO PELA SUA URL REAL.
-      //
-      // 2. RESPOSTA (JSON): Se a busca for bem-sucedida (statusCode 200),
-      //    a API deve retornar uma LISTA de objetos, onde cada objeto
-      //    tem o seguinte formato:
-      //
-      // [
-      //   {
-      //     "id": "string_unica_do_item",
-      //     "time": "08:30",
-      //     "name": "Nome do Alimento",
-      //     "description": "Descrição detalhada do alimento.",
-      //     "checked": false
-      //   },
-      //   ... outros itens
-      // ]
-      // ---------------------------------------------------
-      final url = Uri.parse('$apiUrl/api/rotinas/$_userId/activity?type=alimentacao');
+      final url = Uri.parse('$apiUrl/api/rotinas/$_userId/activity');
 
       final response = await http.get(
         url,
@@ -113,74 +110,67 @@ class _FoodPageState extends State<FoodPage> {
         },
       );
 
-
       if (response.statusCode == 200) {
-        List<dynamic> jsonList = json.decode(response.body);
+        Map<String, dynamic> decodedResponse = json.decode(response.body);
+        List<dynamic> allActivities = decodedResponse['data']['activity'];
+
+        // Filtra a lista para pegar apenas os itens do tipo 'alimentacao'
+        List<FoodItem> filteredItems = allActivities
+            .where((item) => item['type'] == 'alimentacao')
+            .map((json) => FoodItem.fromJson(json))
+            .toList();
+
         setState(() {
-          foodItems = jsonList.map((json) => FoodItem.fromJson(json)).toList();
+          foodItems = filteredItems;
           isLoading = false;
         });
       } else {
         setState(() {
-          error = 'Falha ao carregar alimentos: ${response.statusCode}.';
+          error = 'Falha ao carregar plano alimentar: ${response.statusCode}.';
           isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        error = 'Ocorreu um erro de conexão. Verifique sua internet.';
+        error = 'Ocorreu um erro de conexão: $e';
         isLoading = false;
       });
     }
   }
 
-  /// Envia a atualização do status de um item para a API.
-  Future<void> _updateFoodItemStatus(String id, bool newStatus) async {
-    if (_userId == null) return;
+  // Envia a atualização de status para a API
+  Future<void> _updateFoodItemStatus(
+    String activityId,
+    bool newCheckedStatus,
+  ) async {
+    if (_userToken == null) return;
+
+    String newApiStatus = newCheckedStatus ? 'concluido' : 'pendente';
 
     try {
-      // --- CONTRATO DE DADOS: ATUALIZAR ITEM (PUT ou PATCH) ---
-      // 1. ENDPOINT: A URL para atualizar um item específico.
-      //    A API deve identificar o item pelo 'id' passado na URL
-      //    (ex: /fooditems/id_do_item).
-      //    [!] SUBSTITUA A URL ABAIXO PELA SUA URL REAL.
-      //
-      // 2. REQUISIÇÃO (JSON): O Flutter envia um JSON no corpo ('body')
-      //    da requisição com os dados a serem atualizados. Para autorização,
-      //    também enviamos o 'userId'. Formato:
-      //
-      // {
-      //   "checked": true,  // ou false
-      //   "userId": "id_do_usuario_logado"
-      // }
-      //
-      // 3. RESPOSTA: A API deve apenas confirmar o sucesso com um
-      //    statusCode 200. O corpo da resposta pode ser vazio.
-      // ---------------------------------------------------
-      final url = Uri.parse('https://sua-api.com.br/fooditems/$id');
+      final url = Uri.parse('$apiUrl/api/rotinas/$activityId');
 
-      final response = await http.put(
+      final response = await http.patch(
+        // Usando PATCH para atualizações parciais
         url,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{
-          'checked': newStatus,
-          'userId': _userId,
-        }),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $_userToken',
+        },
+        body: jsonEncode(<String, String>{'status': newApiStatus}),
       );
 
       if (response.statusCode == 200) {
-        print(
-          'Status do item $id (Alimento) atualizado com sucesso para $newStatus',
-        );
+        print('Status do item $activityId atualizado para $newApiStatus');
       } else {
-        throw Exception('Falha ao atualizar status na API');
+        throw Exception('Falha ao atualizar status na API: ${response.body}');
       }
     } catch (e) {
       // Reverte a mudança na UI em caso de falha
       setState(() {
-        final itemIndex = foodItems.indexWhere((item) => item.id == id);
+        final itemIndex = foodItems.indexWhere((item) => item.id == activityId);
         if (itemIndex != -1) {
-          foodItems[itemIndex].checked = !newStatus;
+          foodItems[itemIndex].checked = !newCheckedStatus;
         }
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -188,7 +178,7 @@ class _FoodPageState extends State<FoodPage> {
           content: Text('Erro ao salvar alteração. Tente novamente.'),
         ),
       );
-      print('Erro ao atualizar status do item $id (Alimento): $e');
+      print('Erro ao atualizar status do item $activityId: $e');
     }
   }
 
@@ -263,12 +253,11 @@ class _FoodPageState extends State<FoodPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Cabeçalho da Lista
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const SizedBox(width: 40 + 16), // Espaço para o checkbox
+                      const SizedBox(width: 40 + 16),
                       SizedBox(
                         width: 80,
                         child: Text(
@@ -292,17 +281,15 @@ class _FoodPageState extends State<FoodPage> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const SizedBox(width: 36), // Espaço para o ícone de info
+                      const SizedBox(width: 36),
                     ],
                   ),
                 ),
                 const Divider(thickness: 1),
-                // Corpo da Lista
                 Expanded(child: _buildBody()),
               ],
             ),
           ),
-          // Footer
           Align(
             alignment: Alignment.bottomCenter,
             child: Stack(
@@ -338,7 +325,6 @@ class _FoodPageState extends State<FoodPage> {
     );
   }
 
-  // Widget auxiliar para construir o corpo da tela (loading, erro, lista)
   Widget _buildBody() {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -358,7 +344,7 @@ class _FoodPageState extends State<FoodPage> {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: _fetchFoodItems,
+                onPressed: _loadUserDataAndFetchRoutines,
                 child: const Text('Tentar Novamente'),
               ),
             ],

@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // ADICIONADO
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'global.dart';
 
+// MODELO ACTIVITYITEM (ATUALIZADO)
 class ActivityItem {
   final String id;
   final String time;
@@ -20,13 +23,26 @@ class ActivityItem {
     this.checked = false,
   });
 
+  // ALTERADO: Factory constructor agora lê o novo formato JSON da API
   factory ActivityItem.fromJson(Map<String, dynamic> json) {
+    bool isChecked = json['status'] == 'concluido';
+
+    String formattedTime = "00:00";
+    if (json['schedule'] != null) {
+      try {
+        DateTime parsedDate = DateTime.parse(json['schedule']);
+        formattedTime = DateFormat('HH:mm').format(parsedDate);
+      } catch (e) {
+        print("Erro ao formatar data do JSON: $e");
+      }
+    }
+
     return ActivityItem(
-      id: json['id'] as String,
-      time: json['time'] as String,
-      activity: json['name'] as String,
+      id: json['_id'] as String,
+      time: formattedTime,
+      activity: json['title'] as String, // Mapeia 'title' para 'activity'
       info: json['description'] as String,
-      checked: json['checked'] as bool? ?? false,
+      checked: isChecked,
     );
   }
 }
@@ -39,11 +55,8 @@ class PhysicalActivityPage extends StatefulWidget {
 }
 
 class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
-  // ADICIONADO: Variável para armazenar o ID do usuário
   String? _userId;
-  // ADICIONADO: Variável para armazenar o token do usuário
   String? _userToken;
-
   List<ActivityItem> activityItems = [];
   bool isLoading = true;
   String? error;
@@ -53,33 +66,29 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
   @override
   void initState() {
     super.initState();
-    // ADICIONADO: Carrega o ID do usuário antes de buscar os itens
-    _loadUserIdAndFetchItems();
+    _loadUserDataAndFetchRoutines();
   }
 
-  // ADICIONADO: Função para carregar o ID do usuário e depois buscar os itens
-  Future<void> _loadUserIdAndFetchItems() async {
+  // ALTERADO: Nome da função para refletir que busca todas as rotinas
+  Future<void> _loadUserDataAndFetchRoutines() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userId = prefs.getString('userId');
       _userToken = prefs.getString('userToken');
     });
 
-    if (_userId == null) {
+    if (_userId == null || _userToken == null) {
       setState(() {
-        error =
-            "Não foi possível identificar o usuário. Tente fazer login novamente.";
+        error = "Usuário não autenticado. Por favor, faça login novamente.";
         isLoading = false;
       });
       return;
     }
-
-    // Após carregar o ID, busca os itens
-    _fetchActivityItems();
+    _fetchRoutines();
   }
 
-  /// Busca a lista de atividades do usuário logado na API.
-  Future<void> _fetchActivityItems() async {
+  // ALTERADO: Busca todas as rotinas e filtra por 'atividade fisica'
+  Future<void> _fetchRoutines() async {
     if (_userId == null) return;
 
     setState(() {
@@ -88,14 +97,8 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
     });
 
     try {
-      print('Buscando atividades para o usuário: $_userId');
-      final url = Uri.parse(
-        '$apiUrl/api/rotinas/$_userId/activity?type=atividade fisica',
-      );
+      final url = Uri.parse('$apiUrl/api/rotinas/$_userId/activity');
 
-      print("URL da API: $url");
-
-      print("Token do usuário: $_userToken");
       final response = await http.get(
         url,
         headers: {
@@ -105,14 +108,18 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
         },
       );
 
-      print('Resposta da API: ${response.statusCode} - ${response.body}');
-
       if (response.statusCode == 200) {
-        List<dynamic> jsonList = json.decode(response.body);
+        Map<String, dynamic> decodedResponse = json.decode(response.body);
+        List<dynamic> allActivities = decodedResponse['data']['activity'];
+
+        // AQUI ESTÁ A MUDANÇA PRINCIPAL: Filtra por 'atividade fisica'
+        List<ActivityItem> filteredItems = allActivities
+            .where((item) => item['type'] == 'atividade fisica')
+            .map((json) => ActivityItem.fromJson(json))
+            .toList();
+
         setState(() {
-          activityItems = jsonList
-              .map((json) => ActivityItem.fromJson(json))
-              .toList();
+          activityItems = filteredItems;
           isLoading = false;
         });
       } else {
@@ -123,58 +130,45 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
       }
     } catch (e) {
       setState(() {
-        error = 'Ocorreu um erro de conexão. Verifique sua internet.';
+        error = 'Ocorreu um erro de conexão: $e';
         isLoading = false;
       });
     }
   }
 
-  /// Envia a atualização do status de uma atividade para a API.
-  Future<void> _updateActivityItemStatus(String id, bool newStatus) async {
-    if (_userId == null) return;
+  // ALTERADO: Envia a atualização de status no formato que a API espera
+  Future<void> _updateActivityItemStatus(
+    String activityId,
+    bool newCheckedStatus,
+  ) async {
+    if (_userToken == null) return;
+
+    String newApiStatus = newCheckedStatus ? 'concluido' : 'pendente';
 
     try {
-      // --- CONTRATO DE DADOS: ATUALIZAR ATIVIDADE (PUT ou PATCH) ---
-      // 1. ENDPOINT: A URL para atualizar uma atividade específica.
-      //    A API deve identificar o item pelo 'id' passado na URL
-      //    (ex: /activities/id_da_atividade).
-      //    [!] SUBSTITUA A URL ABAIXO PELA SUA URL REAL.
-      //
-      // 2. REQUISIÇÃO (JSON): O Flutter envia um JSON no corpo ('body')
-      //    com os dados a serem atualizados e o 'userId' para autorização.
-      //    Formato:
-      //
-      // {
-      //   "checked": true,  // ou false
-      //   "userId": "id_do_usuario_logado"
-      // }
-      //
-      // 3. RESPOSTA: A API deve confirmar o sucesso com um statusCode 200.
-      // ---------------------------------------------------
-      final url = Uri.parse('https://sua-api.com.br/activities/$id');
+      final url = Uri.parse('$apiUrl/api/rotinas/$activityId');
 
-      final response = await http.put(
+      final response = await http.patch(
         url,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{
-          'checked': newStatus,
-          'userId': _userId,
-        }),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $_userToken',
+        },
+        body: jsonEncode(<String, String>{'status': newApiStatus}),
       );
 
       if (response.statusCode == 200) {
-        print(
-          'Status do item $id (Atividade) atualizado com sucesso para $newStatus',
-        );
+        print('Status do item $activityId atualizado para $newApiStatus');
       } else {
-        throw Exception('Falha ao atualizar status na API');
+        throw Exception('Falha ao atualizar status na API: ${response.body}');
       }
     } catch (e) {
-      // Reverte a mudança na UI em caso de falha
       setState(() {
-        final itemIndex = activityItems.indexWhere((item) => item.id == id);
+        final itemIndex = activityItems.indexWhere(
+          (item) => item.id == activityId,
+        );
         if (itemIndex != -1) {
-          activityItems[itemIndex].checked = !newStatus;
+          activityItems[itemIndex].checked = !newCheckedStatus;
         }
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -182,7 +176,7 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
           content: Text('Erro ao salvar alteração. Tente novamente.'),
         ),
       );
-      print('Erro ao atualizar status do item $id (Atividade): $e');
+      print('Erro ao atualizar status do item $activityId: $e');
     }
   }
 
@@ -214,7 +208,7 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
               child: Text(
                 'Fechar',
                 style: _popupTextStyle.copyWith(color: Colors.orange),
-              ), // Cor ajustada
+              ),
             ),
           ],
         );
@@ -351,7 +345,7 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: _fetchActivityItems,
+                onPressed: _loadUserDataAndFetchRoutines,
                 child: const Text('Tentar Novamente'),
               ),
             ],
