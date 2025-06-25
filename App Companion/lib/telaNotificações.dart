@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/navigation_bars.dart';
 import '../telaAgenda.dart';
+import 'global.dart';
 
 // NOVO ENUM para controlar o tipo de filtro aplicado.
 enum FilterType { todos, comum, emergencia }

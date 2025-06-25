@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart'; // ADICIONADO
+import 'global.dart';
 
 class ActivityItem {
   final String id;
@@ -89,7 +90,7 @@ class _PhysicalActivityPageState extends State<PhysicalActivityPage> {
     try {
       print('Buscando atividades para o usuário: $_userId');
       final url = Uri.parse(
-        'https://3568-2804-61ac-110b-8200-3c09-c58d-5b94-bf7a.ngrok-free.app/api/rotinas/$_userId/activity?type=atividade fisica',
+        '$apiUrl/api/rotinas/$_userId/activity?type=atividade fisica',
       );
 
       print("URL da API: $url");

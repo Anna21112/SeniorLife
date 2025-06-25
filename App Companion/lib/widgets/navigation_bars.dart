@@ -7,6 +7,7 @@ import '../telaExibirPerfilDepen.dart';
 import '../telaLembretes.dart';
 import '../menuDependentes.dart';
 import '../menuAddDependente.dart';
+import '../global.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -103,22 +104,18 @@ class CustomBottomNavBar extends StatefulWidget {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-      print('Token recuperado: $token');
       if (token == null || token.isEmpty) {
-      print('Token não encontrado, abortando requisição.');
       return;
       }
-      print('Vai fazer requisição para dependents');
       final response = await http.get(
-        Uri.parse('https://2d51-2804-61ac-110b-8200-449-b065-d943-e36e.ngrok-free.app/api/dependents/'),
+        Uri.parse('$apiUrl/api/dependents/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
           'ngrok-skip-browser-warning': 'true',
         },
       );
-      print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final dependentes = data['data']['dependentes'] as List;
@@ -130,7 +127,7 @@ class CustomBottomNavBar extends StatefulWidget {
         setState(() => carregando = false);
       }
     } catch (e) {
-      print('Erro ao buscar dependentes: $e');
+      
       setState(() => carregando = false);
     }
   }
@@ -166,13 +163,13 @@ class CustomBottomNavBar extends StatefulWidget {
                       ),
                     );
                     // Ação ao clicar em um dependente da lista
-                    print('Selecionou o dependente: ${value.nome}');
+                    
                   } else if (value == 'adicionar'){
                     // Ação ao clicar em "Adicionar dependente"
-                    print('Navegar para Adicionar Dependente');
+                   
                   } else if (value == 'editar') {
                     // Ação ao clicar em "Editar Dependentes"
-                    print('Navegar para Editar Dependentes');
+                    
                   }
                 },
                 itemBuilder: (BuildContext context) {
